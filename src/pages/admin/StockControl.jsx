@@ -1,0 +1,262 @@
+import React, { useState, useMemo } from 'react';
+import { useStore } from '../../store/useStore';
+import { AlertTriangle, Boxes, Check, Clipboard, RefreshCw } from 'lucide-react';
+
+export default function StockControl() {
+  const { products, adjustStock } = useStore();
+  const [selectedProduct, setSelectedProduct] = useState('');
+  const [selectedBatch, setSelectedBatch] = useState('');
+  const [adjustQty, setAdjustQty] = useState('');
+  const [adjustReason, setAdjustReason] = useState('count correction');
+  
+  // Worksheet counting audit state
+  const [auditQuantities, setAuditQuantities] = useState({});
+
+  const lowStockProducts = useMemo(() => {
+    return products.filter(p => {
+      const totalQty = p.batches.reduce((sum, b) => sum + b.quantity, 0);
+      return totalQty <= p.reorderLevel;
+    });
+  }, [products]);
+
+  const activeBatches = useMemo(() => {
+    const prod = products.find(p => p.id === selectedProduct);
+    return prod ? prod.batches : [];
+  }, [selectedProduct, products]);
+
+  const handleAdjustSubmit = (e) => {
+    e.preventDefault();
+    if (!selectedProduct || !selectedBatch || !adjustQty) return;
+
+    const qty = parseFloat(adjustQty);
+    adjustStock(selectedProduct, selectedBatch, qty, adjustReason);
+    alert('Stock adjusted successfully');
+    
+    // Reset inputs
+    setAdjustQty('');
+    setSelectedProduct('');
+    setSelectedBatch('');
+  };
+
+  const handleAuditChange = (prodId, batchId, value) => {
+    setAuditQuantities(prev => ({
+      ...prev,
+      [`${prodId}-${batchId}`]: value
+    }));
+  };
+
+  const handleApplyAuditAdjust = (product, batch) => {
+    const key = `${product.id}-${batch.id}`;
+    const counted = parseFloat(auditQuantities[key]);
+    if (isNaN(counted) || counted < 0) {
+      alert('Please enter a valid counted quantity');
+      return;
+    }
+
+    const variance = counted - batch.quantity;
+    if (variance === 0) {
+      alert('Count matches current stock, no adjustments needed.');
+      return;
+    }
+
+    adjustStock(product.id, batch.id, variance, 'count correction');
+    alert(`Applied correction: ${variance > 0 ? '+' : ''}${variance} units. Count matches physical record now.`);
+    
+    // Clear audit input
+    setAuditQuantities(prev => {
+      const copy = { ...prev };
+      delete copy[key];
+      return copy;
+    });
+  };
+
+  return (
+    <div className="space-y-6 text-slate-800 dark:text-slate-100">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">Stock Control & Auditing</h1>
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Verify batch counts, resolve spillage/damages, and manage physical inventory take sheets</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Stock take sheet / audit tool */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+            <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 mb-4 flex items-center space-x-1.5">
+              <Clipboard className="w-5 h-5 text-emerald-500" />
+              <span>Physical Stock Count Audit Sheet</span>
+            </h3>
+
+            <div className="divide-y divide-slate-100 dark:divide-slate-850 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
+              {products.map(p => (
+                <div key={p.id} className="py-4 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-extrabold text-slate-850 dark:text-slate-200 text-xs">{p.name}</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">{p.category} | Brand: {p.brand}</p>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 px-2 py-0.5 rounded">
+                      {p.unit}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-3">
+                    {p.batches.map(b => {
+                      const key = `${p.id}-${b.id}`;
+                      const countedValue = auditQuantities[key] || '';
+                      const variance = countedValue !== '' ? parseFloat(countedValue) - b.quantity : 0;
+
+                      return (
+                        <div key={b.id} className="p-3 bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-850 rounded-xl space-y-2.5">
+                          <div className="flex justify-between text-[11px] font-semibold text-slate-550 dark:text-slate-450">
+                            <span>Batch: <span className="font-mono text-emerald-600 dark:text-emerald-400">{b.batchNumber}</span></span>
+                            <span>System: <strong className="text-slate-700 dark:text-slate-300">{b.quantity}</strong></span>
+                          </div>
+                          
+                          <div className="flex space-x-2 items-center">
+                            <input
+                              type="number"
+                              placeholder="Counted Qty"
+                              value={countedValue}
+                              onChange={(e) => handleAuditChange(p.id, b.id, e.target.value)}
+                              className="w-full px-2 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+                            />
+                            {countedValue !== '' && (
+                              <button
+                                onClick={() => handleApplyAuditAdjust(p, b)}
+                                className="px-2 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-lg hover:scale-105 transition-all focus:outline-none"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+
+                          {countedValue !== '' && (
+                            <div className="flex justify-between text-[10px] font-bold bg-white dark:bg-slate-950 px-2 py-1 rounded border border-slate-200 dark:border-slate-850">
+                              <span className="text-slate-400">Variance:</span>
+                              <span className={variance < 0 ? 'text-red-500' : variance > 0 ? 'text-emerald-600' : 'text-slate-500'}>
+                                {variance > 0 ? '+' : ''}{variance.toFixed(2)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Adjustments Form & Reorder alerts sidebar */}
+        <div className="space-y-6">
+          {/* Quick Adjustment Form */}
+          <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+            <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 mb-4 flex items-center space-x-1.5">
+              <RefreshCw className="w-4.5 h-4.5 text-emerald-500" />
+              <span>Quick Adjustment</span>
+            </h3>
+
+            <form onSubmit={handleAdjustSubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Select Product</label>
+                <select
+                  required
+                  value={selectedProduct}
+                  onChange={(e) => { setSelectedProduct(e.target.value); setSelectedBatch(''); }}
+                  className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="" disabled>Choose product...</option>
+                  {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+
+              {selectedProduct && (
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Select Batch</label>
+                  <select
+                    required
+                    value={selectedBatch}
+                    onChange={(e) => setSelectedBatch(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="" disabled>Choose batch...</option>
+                    {activeBatches.map(b => (
+                      <option key={b.id} value={b.id}>{b.batchNumber} (Current stock: {b.quantity})</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Adjust Quantity (+/-)</label>
+                <input
+                  type="number"
+                  step="any"
+                  required
+                  placeholder="e.g. -5 to reduce, 10 to add"
+                  value={adjustQty}
+                  onChange={(e) => setAdjustQty(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Adjustment Reason</label>
+                <select
+                  value={adjustReason}
+                  onChange={(e) => setAdjustReason(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="damage">Product Damage / Spillage</option>
+                  <option value="theft">Stock Discrepancy / Write-off</option>
+                  <option value="count correction">Physical Count Variance correction</option>
+                  <option value="promotional give-away">Promotional Giveaway</option>
+                </select>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow transition-all active:scale-98"
+              >
+                Apply Adjustment
+              </button>
+            </form>
+          </div>
+
+          {/* Low Stock Watch */}
+          <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+            <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 mb-4 flex items-center space-x-1.5">
+              <AlertTriangle className="w-4.5 h-4.5 text-amber-500 animate-pulse" />
+              <span>Low Stock Watchlist ({lowStockProducts.length})</span>
+            </h3>
+
+            {lowStockProducts.length === 0 ? (
+              <div className="text-center py-6 text-xs text-slate-400 dark:text-slate-500">
+                All stock values are healthy!
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100 dark:divide-slate-850">
+                {lowStockProducts.map(p => {
+                  const qty = p.batches.reduce((sum, b) => sum + b.quantity, 0);
+                  return (
+                    <div key={p.id} className="py-2.5 flex justify-between items-center text-xs">
+                      <div>
+                        <p className="font-bold text-slate-800 dark:text-slate-200">{p.name}</p>
+                        <span className="text-[9px] text-slate-400 dark:text-slate-500">Threshold: {p.reorderLevel} units</span>
+                      </div>
+                      <span className="font-extrabold text-amber-600 dark:text-amber-400">
+                        {qty} units left
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
