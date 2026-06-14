@@ -1,5 +1,44 @@
 import React, { useMemo } from 'react';
 import { Activity } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+  LabelList
+} from 'recharts';
+
+const BAR_COLORS = [
+  { stop0: '#10b981', stop100: '#047857' }, // Emerald
+  { stop0: '#3b82f6', stop100: '#1d4ed8' }, // Blue
+  { stop0: '#f97316', stop100: '#ea580c' }, // Orange
+  { stop0: '#8b5cf6', stop100: '#6d28d9' }, // Violet / Purple
+  { stop0: '#ec4899', stop100: '#db2777' }, // Pink
+  { stop0: '#06b6d4', stop100: '#0891b2' }, // Cyan
+  { stop0: '#14b8a6', stop100: '#0d9488' }, // Teal
+  { stop0: '#f59e0b', stop100: '#d97706' }, // Amber
+  { stop0: '#6366f1', stop100: '#4f46e5' }, // Indigo
+  { stop0: '#84cc16', stop100: '#65a30d' }, // Lime
+  { stop0: '#22c55e', stop100: '#16a34a' }, // Green
+  { stop0: '#eab308', stop100: '#ca8a04' }, // Yellow
+];
+
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-4 py-2.5 rounded-lg shadow-md border border-slate-800 dark:border-slate-200">
+        <p className="text-[15px] font-black font-mono">
+          GHS {payload[0].value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function SalesTrendChart({ filteredTransactions, timeFilter }) {
   // Dynamic Sales Trend Bar Data Points Generator
@@ -65,44 +104,8 @@ export default function SalesTrendChart({ filteredTransactions, timeFilter }) {
     return intervals;
   }, [filteredTransactions, timeFilter]);
 
-  // SVG Calculations for Bar Trend Chart
-  const svgTrendData = useMemo(() => {
-    const width = 1000;
-    const height = 190;
-    const paddingLeft = 45;
-    const paddingRight = 15;
-    const paddingTop = 28;
-    const paddingBottom = 25;
-
-    const maxVal = Math.max(...salesTrendPoints.map(p => p.value), 200); // minimum scale limit
-    const innerWidth = width - paddingLeft - paddingRight;
-    const innerHeight = height - paddingTop - paddingBottom;
-
-    const numPoints = salesTrendPoints.length;
-    const step = innerWidth / numPoints;
-    const barWidth = step * 0.55; // Sized nicely to leave room between bars
-
-    const bars = salesTrendPoints.map((p, idx) => {
-      const centerX = paddingLeft + (idx + 0.5) * step;
-      const x = centerX - barWidth / 2;
-      const valHeight = (p.value / maxVal) * innerHeight;
-      const y = paddingTop + innerHeight - valHeight;
-      return { 
-        x, 
-        y, 
-        width: barWidth, 
-        height: valHeight, 
-        label: p.label, 
-        value: p.value, 
-        centerX 
-      };
-    });
-
-    return { bars, width, height, maxVal, innerHeight, paddingTop, paddingLeft, innerWidth };
-  }, [salesTrendPoints]);
-
   return (
-    <div className="lg:col-span-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-4">
+    <div className="lg:col-span-2 bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <Activity className="w-4.5 h-4.5 text-emerald-500" />
@@ -113,100 +116,59 @@ export default function SalesTrendChart({ filteredTransactions, timeFilter }) {
         </span>
       </div>
 
-      <div className="relative pt-2">
-        <svg 
-          viewBox={`0 0 ${svgTrendData.width} ${svgTrendData.height}`} 
-          className="w-full h-44 overflow-visible"
-        >
-          <defs>
-            <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="1" />
-              <stop offset="100%" stopColor="#059669" stopOpacity="0.25" />
-            </linearGradient>
-          </defs>
+      <div className="relative pt-2 w-full h-64">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={salesTrendPoints}
+            margin={{ top: 25, right: 15, left: -15, bottom: 0 }}
+          >
+            <defs>
+              {/* Dynamic linear gradients for each bar item */}
+              {salesTrendPoints.map((entry, i) => {
+                const color = BAR_COLORS[i % BAR_COLORS.length];
+                return (
+                  <linearGradient key={i} id={`rechartsBarGrad-${i}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={color.stop0} stopOpacity={1} />
+                    <stop offset="100%" stopColor={color.stop100} stopOpacity="0.3" />
+                  </linearGradient>
+                );
+              })}
+            </defs>
 
-          {/* Y Axis Gridlines and Labels */}
-          {[0, 0.5, 1].map((ratio, i) => {
-            const y = svgTrendData.paddingTop + svgTrendData.innerHeight * (1 - ratio);
-            const labelVal = Math.round(svgTrendData.maxVal * ratio);
-            return (
-              <g key={i} className="opacity-40">
-                <line 
-                  x1={svgTrendData.paddingLeft} 
-                  y1={y} 
-                  x2={svgTrendData.width - 15} 
-                  y2={y} 
-                  className="stroke-slate-200 dark:stroke-slate-850 stroke-1" 
-                  strokeDasharray="4,4"
-                />
-                <text 
-                  x={svgTrendData.paddingLeft - 8} 
-                  y={y + 3} 
-                  textAnchor="end" 
-                  className="fill-slate-400 dark:fill-slate-500 font-bold text-[8px] font-mono"
-                >
-                  {labelVal >= 1000 ? `${(labelVal / 1000).toFixed(1)}k` : labelVal}
-                </text>
-              </g>
-            );
-          })}
+            <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#e2e8f0" className="dark:stroke-slate-800" />
 
-          {/* Bars Rendering */}
-          {svgTrendData.bars.map((bar, i) => (
-            <g key={i} className="group cursor-pointer">
-              {/* Highlight background column effect on hover */}
-              <rect
-                x={bar.centerX - (bar.width * 0.9)}
-                y={svgTrendData.paddingTop - 6}
-                width={bar.width * 1.8}
-                height={svgTrendData.innerHeight + 12}
-                className="fill-slate-100/50 dark:fill-slate-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none"
-                rx="4"
+            <XAxis
+              dataKey="label"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#64748b', fontSize: 16, fontWeight: 'bold' }}
+            />
+
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#64748b', fontSize: 16, fontWeight: 'extrabold', fontFamily: 'monospace' }}
+              tickFormatter={(val) => (val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val)}
+            />
+
+            <Tooltip
+              cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }}
+              content={<CustomTooltip />}
+            />
+
+            <Bar dataKey="value" radius={[4, 4, 0, 0]} minPointSize={2}>
+              {salesTrendPoints.map((entry, i) => (
+                <Cell key={`cell-${i}`} fill={`url(#rechartsBarGrad-${i})`} />
+              ))}
+              <LabelList
+                dataKey="value"
+                position="top"
+                formatter={(val) => (val > 0 ? `GHS ${val.toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '')}
+                className="fill-slate-700 dark:fill-slate-200 text-[16px] font-black font-mono"
               />
-
-              {/* The SVG bar rectangle */}
-              <rect
-                x={bar.x}
-                y={bar.y}
-                width={bar.width}
-                height={Math.max(bar.height, 2)}
-                fill="url(#barGradient)"
-                rx="3.5"
-                className="transition-all duration-200 group-hover:brightness-110"
-              />
-
-              {/* Tooltip showing value on hover */}
-              <g className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                <rect
-                  x={bar.centerX - 45}
-                  y={bar.y - 23}
-                  width="90"
-                  height="16"
-                  rx="4"
-                  className="fill-slate-900 dark:fill-slate-100 filter drop-shadow-sm"
-                />
-                <text 
-                  x={bar.centerX} 
-                  y={bar.y - 12} 
-                  textAnchor="middle" 
-                  className="fill-white dark:fill-slate-900 text-[8px] font-bold font-mono"
-                >
-                  GHS {bar.value.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                </text>
-              </g>
-
-              {/* Label at the bottom */}
-              <text 
-                x={bar.centerX} 
-                y={svgTrendData.height - 8} 
-                textAnchor="middle" 
-                className="fill-slate-400 dark:fill-slate-500 font-bold text-[8px]"
-              >
-                {bar.label}
-              </text>
-            </g>
-          ))}
-        </svg>
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
