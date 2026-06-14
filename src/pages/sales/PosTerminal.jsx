@@ -21,7 +21,6 @@ export default function PosTerminal() {
   const {
     products,
     customers,
-    activeShift,
     cart,
     selectedCustomer,
     wholesaleMode,
@@ -86,11 +85,6 @@ export default function PosTerminal() {
 
   // Handle add item (picks the first expired batch = FEFO)
   const handleAddItem = (product) => {
-    if (!activeShift) {
-      alert('You must open a shift before making sales. Go to Shift & Till.');
-      return;
-    }
-
     const availableBatches = [...product.batches]
       .filter(b => b.quantity > 0)
       .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
@@ -458,10 +452,6 @@ export default function PosTerminal() {
             <button
               onClick={() => {
                 if (cart.length === 0) return;
-                if (!activeShift) {
-                  alert('Shift not open. Open a shift first.');
-                  return;
-                }
                 setShowCheckoutModal(true);
               }}
               disabled={cart.length === 0}

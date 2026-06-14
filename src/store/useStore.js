@@ -393,49 +393,6 @@ export const useStore = create((set, get) => ({
     return { success: true };
   },
 
-  // SHIFT MANAGEMENT
-  activeShift: null,
-  shifts: [],
-
-  openShift: (floatAmount) => {
-    if (get().activeShift) return { success: false, message: 'A shift is already active' };
-    const user = get().currentUser;
-    if (!user) return { success: false, message: 'No authenticated user to open shift' };
-    
-    const newShift = {
-      id: `shift-${Date.now()}`,
-      cashierId: user.id,
-      cashierName: user.name,
-      openedAt: new Date().toISOString(),
-      closedAt: null,
-      openingFloat: parseFloat(floatAmount) || 0,
-      expectedCash: parseFloat(floatAmount) || 0,
-      countedCash: 0,
-      status: 'open',
-      salesSummary: { cash: 0, momo: 0, card: 0, credit: 0, totalSales: 0, count: 0 }
-    };
-    set({ activeShift: newShift });
-    return { success: true, shift: newShift };
-  },
-
-  closeShift: (countedCash) => {
-    const active = get().activeShift;
-    if (!active) return { success: false, message: 'No active shift to close' };
-    
-    const closedShift = {
-      ...active,
-      closedAt: new Date().toISOString(),
-      countedCash: parseFloat(countedCash) || 0,
-      status: 'closed'
-    };
-    
-    set(state => ({
-      activeShift: null,
-      shifts: [closedShift, ...state.shifts]
-    }));
-    return { success: true, shift: closedShift };
-  },
-
   // CUSTOMER STATE
   customers: INITIAL_CUSTOMERS,
 
@@ -626,11 +583,9 @@ export const useStore = create((set, get) => ({
   checkout: (paymentDetails) => {
     const cart = get().cart;
     const selectedCustomer = get().selectedCustomer;
-    const activeShift = get().activeShift;
     const currentUser = get().currentUser;
 
     if (cart.length === 0) return { success: false, message: 'Cart is empty' };
-    if (!activeShift) return { success: false, message: 'Shift is not open. You cannot make sales.' };
 
     let totalExcludingTax = 0;
     let totalTax = 0;
@@ -690,34 +645,8 @@ export const useStore = create((set, get) => ({
     };
 
     set(state => {
-      const shift = state.activeShift;
-      if (!shift) return {};
-      
-      const summary = { ...shift.salesSummary };
-      summary.count += 1;
-      summary.totalSales = Number((summary.totalSales + totalCost).toFixed(2));
-      
-      if (paymentDetails.method === 'cash') summary.cash = Number((summary.cash + totalCost).toFixed(2));
-      else if (paymentDetails.method === 'momo') summary.momo = Number((summary.momo + totalCost).toFixed(2));
-      else if (paymentDetails.method === 'card') summary.card = Number((summary.card + totalCost).toFixed(2));
-      else if (paymentDetails.method === 'credit') summary.credit = Number((summary.credit + totalCost).toFixed(2));
-      else if (paymentDetails.method === 'split') {
-        summary.cash = Number((summary.cash + (paymentDetails.splitAmounts?.cash || 0)).toFixed(2));
-        summary.momo = Number((summary.momo + (paymentDetails.splitAmounts?.momo || 0)).toFixed(2));
-        summary.card = Number((summary.card + (paymentDetails.splitAmounts?.card || 0)).toFixed(2));
-      }
-      
-      let additionalExpectedCash = 0;
-      if (paymentDetails.method === 'cash') additionalExpectedCash = totalCost;
-      else if (paymentDetails.method === 'split') additionalExpectedCash = paymentDetails.splitAmounts?.cash || 0;
-
       return {
         transactions: [newTransaction, ...state.transactions],
-        activeShift: {
-          ...shift,
-          expectedCash: Number((shift.expectedCash + additionalExpectedCash).toFixed(2)),
-          salesSummary: summary
-        },
         cart: [],
         selectedCustomer: null
       };

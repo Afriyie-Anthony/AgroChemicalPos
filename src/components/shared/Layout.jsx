@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 
 export default function Layout({ children }) {
-  const { currentUser, activeShift, logout, theme, toggleTheme, products, customers } = useStore();
+  const { currentUser, logout, theme, toggleTheme, products, customers } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);

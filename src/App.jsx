@@ -11,7 +11,6 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import Inventory from './pages/admin/Inventory';
 import Customers from './pages/admin/Customers';
 import PosTerminal from './pages/sales/PosTerminal';
-import ShiftControl from './pages/sales/ShiftControl';
 
 // New Admin Pages
 import TransactionsList from './pages/admin/TransactionsList';
@@ -158,14 +157,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/sales/shift"
-          element={
-            <ProtectedRoute>
-              <ShiftControl />
-            </ProtectedRoute>
-          }
-        />
+
 
         {/* Fallbacks */}
         <Route path="/" element={<Navigate to="/login" replace />} />
