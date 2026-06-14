@@ -11,7 +11,7 @@ export default function PaymentBreakdown({ payments, totalSales }) {
       <div className="space-y-4">
         <div className="flex items-center space-x-2">
           <Coins className="w-4.5 h-4.5 text-emerald-500" />
-          <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200">Revenues Split (Cash & MoMo)</h3>
+          <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">Revenues Split (Cash & MoMo)</h3>
         </div>
 
         <div className="space-y-4.5 pt-2">

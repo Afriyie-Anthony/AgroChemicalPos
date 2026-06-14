@@ -41,7 +41,7 @@ export default function Settings() {
     <div className="space-y-6 text-slate-800 dark:text-slate-100 font-sans max-w-4xl">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight">System Configuration Settings</h1>
+        <h1 className="text-2xl font-bold tracking-tight">System Configuration Settings</h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Configure store metadata, Ghana Post GPS location details, and GRA tax schedules</p>
       </div>
 
@@ -57,7 +57,7 @@ export default function Settings() {
         <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-5 md:col-span-2">
           <div className="flex items-center space-x-2 pb-3 border-b border-slate-100 dark:border-slate-900">
             <Store className="w-5 h-5 text-emerald-500" />
-            <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-205">Business Profile Details</h3>
+            <h3 className="font-bold text-sm text-slate-800 dark:text-slate-205">Business Profile Details</h3>
           </div>
 
           <div className="space-y-4 text-xs">
@@ -127,7 +127,7 @@ export default function Settings() {
           <div className="space-y-4">
             <div className="flex items-center space-x-2 pb-3 border-b border-slate-100 dark:border-slate-900">
               <Percent className="w-5 h-5 text-emerald-500" />
-              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-205">GRA Tax Configurations</h3>
+              <h3 className="font-bold text-sm text-slate-800 dark:text-slate-205">GRA Tax Configurations</h3>
             </div>
 
             <div className="space-y-3.5 text-xs">

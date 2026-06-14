@@ -74,7 +74,7 @@ export default function StockControl() {
     <div className="space-y-6 text-slate-800 dark:text-slate-100">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">Stock Control & Auditing</h1>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Stock Control & Auditing</h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Verify batch counts, resolve spillage/damages, and manage physical inventory take sheets</p>
       </div>
 
@@ -82,7 +82,7 @@ export default function StockControl() {
         {/* Stock take sheet / audit tool */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
-            <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 mb-4 flex items-center space-x-1.5">
+            <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200 mb-4 flex items-center space-x-1.5">
               <Clipboard className="w-5 h-5 text-emerald-500" />
               <span>Physical Stock Count Audit Sheet</span>
             </h3>
@@ -92,7 +92,7 @@ export default function StockControl() {
                 <div key={p.id} className="py-4 space-y-3">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="font-extrabold text-slate-850 dark:text-slate-200 text-xs">{p.name}</p>
+                      <p className="font-bold text-slate-850 dark:text-slate-200 text-xs">{p.name}</p>
                       <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">{p.category} | Brand: {p.brand}</p>
                     </div>
                     <span className="text-[10px] font-bold text-slate-400 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 px-2 py-0.5 rounded">
@@ -153,7 +153,7 @@ export default function StockControl() {
         <div className="space-y-6">
           {/* Quick Adjustment Form */}
           <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
-            <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 mb-4 flex items-center space-x-1.5">
+            <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200 mb-4 flex items-center space-x-1.5">
               <RefreshCw className="w-4.5 h-4.5 text-emerald-500" />
               <span>Quick Adjustment</span>
             </h3>
@@ -227,7 +227,7 @@ export default function StockControl() {
 
           {/* Low Stock Watch */}
           <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
-            <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200 mb-4 flex items-center space-x-1.5">
+            <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200 mb-4 flex items-center space-x-1.5">
               <AlertTriangle className="w-4.5 h-4.5 text-amber-500 animate-pulse" />
               <span>Low Stock Watchlist ({lowStockProducts.length})</span>
             </h3>
@@ -246,7 +246,7 @@ export default function StockControl() {
                         <p className="font-bold text-slate-800 dark:text-slate-200">{p.name}</p>
                         <span className="text-[9px] text-slate-400 dark:text-slate-500">Threshold: {p.reorderLevel} units</span>
                       </div>
-                      <span className="font-extrabold text-amber-600 dark:text-amber-400">
+                      <span className="font-bold text-amber-600 dark:text-amber-400">
                         {qty} units left
                       </span>
                     </div>

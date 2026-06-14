@@ -120,7 +120,7 @@ export default function PurchaseOrders() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">Purchase Orders & GRN</h1>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Purchase Orders & GRN</h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Issue Local Purchase Orders (LPOs) to suppliers and verify goods received notifications (GRN)</p>
         </div>
         <button

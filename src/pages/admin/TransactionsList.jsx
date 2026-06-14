@@ -47,7 +47,7 @@ export default function TransactionsList() {
     <div className="space-y-6 text-slate-800 dark:text-slate-100">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">Sales & Transaction History</h1>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Sales & Transaction History</h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Audit checkout registers, view receipts, and void erroneous transactions</p>
       </div>
 
@@ -107,7 +107,7 @@ export default function TransactionsList() {
                     <td className="px-6 py-4 text-slate-500 dark:text-slate-400">{formatDateTime(t.createdAt)}</td>
                     <td className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300">{t.customer?.name || 'Walk-in Customer'}</td>
                     <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{t.cashierName}</td>
-                    <td className="px-6 py-4 font-extrabold text-slate-800 dark:text-slate-100">{formatCurrency(t.total)}</td>
+                    <td className="px-6 py-4 font-bold text-slate-800 dark:text-slate-100">{formatCurrency(t.total)}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-1.5">
                         <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
@@ -151,7 +151,7 @@ export default function TransactionsList() {
                 <X className="w-4 h-4" />
               </button>
               <span className="text-lg">🌿</span>
-              <h2 className="text-sm font-extrabold uppercase">AgroChem POS Store</h2>
+              <h2 className="text-sm font-bold uppercase">AgroChem POS Store</h2>
               <p>GPS: EN-023-4567 | Phone: 0244123456</p>
               <p className="border-b border-dashed border-slate-400 pb-2">GRA TIN: GHA-98765432-1</p>
             </div>
@@ -206,7 +206,7 @@ export default function TransactionsList() {
                 <span>VAT & Levies:</span>
                 <span>{formatCurrency(activeTrx.tax)}</span>
               </div>
-              <div className="flex justify-between text-xs font-extrabold pt-1">
+              <div className="flex justify-between text-xs font-bold pt-1">
                 <span>Grand Total:</span>
                 <span>{formatCurrency(activeTrx.total)}</span>
               </div>

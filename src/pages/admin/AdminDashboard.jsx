@@ -137,7 +137,7 @@ export default function AdminDashboard() {
       {/* Header and Time Filters */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Admin Command Center</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Admin Command Center</h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Real-time performance analytics for your agro-chemical shop</p>
         </div>
         <div className="flex space-x-2 bg-white dark:bg-slate-950 p-1.5 rounded-xl border border-slate-200 dark:border-slate-850 self-start shadow-sm transition-colors duration-200">

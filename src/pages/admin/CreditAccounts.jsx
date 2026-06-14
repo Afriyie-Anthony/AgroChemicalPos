@@ -83,7 +83,7 @@ export default function CreditAccounts() {
     <div className="space-y-6 text-slate-800 dark:text-slate-100 font-sans">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight">Credit & Debtors Ledger</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Credit & Debtors Ledger</h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Track customer credit terms, outstanding debts, risk exposure, and repayments</p>
       </div>
 
@@ -177,7 +177,7 @@ export default function CreditAccounts() {
               <div className="space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-extrabold text-slate-800 dark:text-slate-200 text-sm leading-tight">{cust.name}</h3>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm leading-tight">{cust.name}</h3>
                     <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">{cust.segment}</p>
                   </div>
                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide ${
@@ -269,7 +269,7 @@ export default function CreditAccounts() {
             <form onSubmit={handleRepaymentSubmit} className="p-6 space-y-4 text-xs text-slate-850 dark:text-slate-250">
               <div className="p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 rounded-2xl space-y-1.5">
                 <p className="text-[10px] font-bold text-slate-400 uppercase">Customer Profile</p>
-                <p className="font-extrabold text-sm text-slate-800 dark:text-slate-200">{selectedCustomer.name}</p>
+                <p className="font-bold text-sm text-slate-800 dark:text-slate-200">{selectedCustomer.name}</p>
                 <div className="flex justify-between text-xs">
                   <span className="text-slate-500">Total Outstanding:</span>
                   <span className="font-bold text-rose-500">GHS {selectedCustomer.outstandingCredit.toFixed(2)}</span>
@@ -340,7 +340,7 @@ export default function CreditAccounts() {
               <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-850 text-xs">
                 <div>
                   <span className="text-slate-400 font-bold uppercase text-[9px] block">Customer Details</span>
-                  <p className="font-extrabold text-slate-800 dark:text-slate-200 mt-1">{selectedCustomer.name}</p>
+                  <p className="font-bold text-slate-800 dark:text-slate-200 mt-1">{selectedCustomer.name}</p>
                   <p className="text-slate-500 mt-0.5">{selectedCustomer.phone}</p>
                   <p className="text-slate-550 mt-0.5 font-mono">{selectedCustomer.gpsAddress}</p>
                 </div>
@@ -353,7 +353,7 @@ export default function CreditAccounts() {
               </div>
 
               <div>
-                <h4 className="text-[10px] font-extrabold text-slate-450 uppercase tracking-wider mb-2.5">Credit Transactions</h4>
+                <h4 className="text-[10px] font-bold text-slate-450 uppercase tracking-wider mb-2.5">Credit Transactions</h4>
                 {customerLedger.length === 0 ? (
                   <div className="text-center py-8 bg-slate-50/50 dark:bg-slate-950/20 border border-dashed border-slate-250 dark:border-slate-800 rounded-2xl">
                     <p className="text-xs text-slate-450 font-bold">No registered sales history found for this account.</p>

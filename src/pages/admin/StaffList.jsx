@@ -127,7 +127,7 @@ export default function StaffList() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Staff Credentials & Access</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Staff Credentials & Access</h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Manage team user login roles, security passwords, and sales commission ratios</p>
         </div>
         <button
@@ -174,7 +174,7 @@ export default function StaffList() {
                       {staff.name.split(' ').map(n => n[0]).join('')}
                     </div>
                     <div>
-                      <h3 className="font-extrabold text-slate-800 dark:text-slate-200 text-sm leading-none">{staff.name}</h3>
+                      <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm leading-none">{staff.name}</h3>
                       <span className="text-[10px] text-slate-400 dark:text-slate-550 font-semibold tracking-wide uppercase mt-1 inline-block">{staff.role} Account</span>
                     </div>
                   </div>

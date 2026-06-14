@@ -68,7 +68,7 @@ export default function Suppliers() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">Supplier Contacts Directory</h1>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Supplier Contacts Directory</h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Maintain agrochemical wholesale suppliers lists and payment terms</p>
         </div>
         <button
@@ -86,7 +86,7 @@ export default function Suppliers() {
           <div key={sup.id} className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-2xl p-5 shadow-sm space-y-4 flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all">
             <div className="space-y-2.5">
               <div className="flex justify-between items-start">
-                <h3 className="font-extrabold text-slate-850 dark:text-slate-200 text-sm leading-tight">{sup.name}</h3>
+                <h3 className="font-bold text-slate-850 dark:text-slate-200 text-sm leading-tight">{sup.name}</h3>
                 <span className="p-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-400 rounded-lg">
                   <Truck className="w-4 h-4 text-emerald-500" />
                 </span>

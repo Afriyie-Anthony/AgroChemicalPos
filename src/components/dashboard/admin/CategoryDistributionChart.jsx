@@ -63,7 +63,7 @@ export default function CategoryDistributionChart({ filteredTransactions }) {
     <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm space-y-4">
       <div className="flex items-center space-x-2">
         <TrendingUp className="w-4.5 h-4.5 text-emerald-500" />
-        <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200">Category Share Distribution</h3>
+        <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">Category Share Distribution</h3>
       </div>
 
       {categoryData.length === 0 ? (

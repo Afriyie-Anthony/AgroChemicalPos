@@ -106,7 +106,7 @@ export default function Layout({ children }) {
               <Sprout className="w-5.5 h-5.5 text-white" />
             </div>
             <div>
-              <h1 className="font-extrabold text-sm tracking-tight text-slate-800 dark:text-white leading-none">AgroChem POS</h1>
+              <h1 className="font-bold text-sm tracking-tight text-slate-800 dark:text-white leading-none">AgroChem POS</h1>
               <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold tracking-wide uppercase mt-1 inline-block">Admin Panel</span>
             </div>
           </div>
@@ -174,7 +174,7 @@ export default function Layout({ children }) {
                 KA
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-extrabold text-slate-800 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-450 transition-colors">Kwame Asante</p>
+                <p className="text-xs font-bold text-slate-800 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-450 transition-colors">Kwame Asante</p>
                 <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate">Administrator</p>
               </div>
             </div>

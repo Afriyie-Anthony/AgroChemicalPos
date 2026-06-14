@@ -26,7 +26,7 @@ export default function TopProductsChart({ filteredTransactions }) {
     <div className="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-4">
       <div className="flex items-center space-x-2">
         <Layers className="w-4.5 h-4.5 text-emerald-505" />
-        <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-205">Top Selling Products</h3>
+        <h3 className="font-bold text-sm text-slate-800 dark:text-slate-205">Top Selling Products</h3>
       </div>
 
       {topSellingProducts.length === 0 ? (

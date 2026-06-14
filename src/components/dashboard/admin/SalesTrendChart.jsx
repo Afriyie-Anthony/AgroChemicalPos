@@ -99,7 +99,7 @@ export default function SalesTrendChart({ filteredTransactions, timeFilter }) {
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <Activity className="w-4.5 h-4.5 text-emerald-505" />
-          <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200">Revenues Trend curve</h3>
+          <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">Revenues Trend curve</h3>
         </div>
         <span className="text-[9px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 px-2 py-0.5 rounded uppercase">
           Live updates
@@ -175,7 +175,7 @@ export default function SalesTrendChart({ filteredTransactions, timeFilter }) {
                 x={c.x} 
                 y={c.y - 8} 
                 textAnchor="middle" 
-                className="fill-slate-700 dark:fill-slate-350 text-[8px] font-extrabold font-mono opacity-0 group-hover/dot:opacity-100 transition-opacity bg-white px-1 py-0.5 rounded shadow"
+                className="fill-slate-700 dark:fill-slate-350 text-[8px] font-bold font-mono opacity-0 group-hover/dot:opacity-100 transition-opacity bg-white px-1 py-0.5 rounded shadow"
               >
                 {c.value.toFixed(0)}
               </text>

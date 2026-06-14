@@ -170,7 +170,7 @@ export default function Reports() {
       {/* Header and Date Filter */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Business Reports & Auditing</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Business Reports & Auditing</h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Verify revenues, gross profit margins, statutory GRA taxes, and inventory ledger checks</p>
         </div>
         <div className="flex items-center space-x-3 self-start">
@@ -192,7 +192,7 @@ export default function Reports() {
       <div className="flex border-b border-slate-200 dark:border-slate-800">
         <button
           onClick={() => setActiveTab('financials')}
-          className={`px-5 py-3 text-xs font-extrabold border-b-2 transition-all ${
+          className={`px-5 py-3 text-xs font-bold border-b-2 transition-all ${
             activeTab === 'financials'
               ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
               : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -202,7 +202,7 @@ export default function Reports() {
         </button>
         <button
           onClick={() => setActiveTab('tax')}
-          className={`px-5 py-3 text-xs font-extrabold border-b-2 transition-all ${
+          className={`px-5 py-3 text-xs font-bold border-b-2 transition-all ${
             activeTab === 'tax'
               ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
               : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -212,7 +212,7 @@ export default function Reports() {
         </button>
         <button
           onClick={() => setActiveTab('movement')}
-          className={`px-5 py-3 text-xs font-extrabold border-b-2 transition-all ${
+          className={`px-5 py-3 text-xs font-bold border-b-2 transition-all ${
             activeTab === 'movement'
               ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
               : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -259,7 +259,7 @@ export default function Reports() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Sales by Channel Card */}
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-4 lg:col-span-1">
-              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200">Sales Payment Breakdown</h3>
+              <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">Sales Payment Breakdown</h3>
               <div className="space-y-3 pt-2">
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-slate-400 font-medium">Cash Sales</span>
@@ -282,7 +282,7 @@ export default function Reports() {
 
             {/* Explanatory note or checklist */}
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-4 lg:col-span-2">
-              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200">Financial Reports Advisory</h3>
+              <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">Financial Reports Advisory</h3>
               <div className="space-y-3.5 text-xs text-slate-500 dark:text-slate-400">
                 <p>This report calculates **Gross Profit** based on actual unit cost prices recorded in stock batches versus final point-of-sale checkout prices. Voided transactions are automatically omitted from both sales and cost of goods sold calculations.</p>
                 <div className="flex items-start space-x-2.5 p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-850 rounded-xl">
@@ -331,19 +331,19 @@ export default function Reports() {
 
           {/* Taxable/Exempt split logs */}
           <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-4">
-            <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200">Exempt vs Taxable Sales Auditing</h3>
+            <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">Exempt vs Taxable Sales Auditing</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
               <div className="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-850 flex justify-between items-center text-xs">
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase">Taxable Sales (Standard Rated)</span>
-                  <p className="text-sm font-extrabold text-slate-800 dark:text-slate-200 mt-1">GHS {taxAuditData.taxableSales.toFixed(2)}</p>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">GHS {taxAuditData.taxableSales.toFixed(2)}</p>
                 </div>
                 <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">18.125% TAXED</span>
               </div>
               <div className="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-850 flex justify-between items-center text-xs">
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase">Zero-Rated / Exempt Sales</span>
-                  <p className="text-sm font-extrabold text-slate-800 dark:text-slate-200 mt-1">GHS {taxAuditData.exemptSales.toFixed(2)}</p>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">GHS {taxAuditData.exemptSales.toFixed(2)}</p>
                 </div>
                 <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-500 dark:bg-slate-900 dark:text-slate-400">EXEMPT (Farm Tools)</span>
               </div>
@@ -360,7 +360,7 @@ export default function Reports() {
       {activeTab === 'movement' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="font-extrabold text-sm text-slate-805 dark:text-slate-205">Inventory Audit Trail Log</h3>
+            <h3 className="font-bold text-sm text-slate-805 dark:text-slate-205">Inventory Audit Trail Log</h3>
             <span className="text-[10px] bg-slate-100 dark:bg-slate-900 px-3 py-1 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold rounded-lg uppercase">
               {stockMovements.length} logged events
             </span>
@@ -392,7 +392,7 @@ export default function Reports() {
                         {mov.typeLabel}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-extrabold text-slate-750 dark:text-slate-250">{mov.productName}</td>
+                    <td className="px-4 py-3 font-bold text-slate-750 dark:text-slate-250">{mov.productName}</td>
                     <td className="px-4 py-3 font-mono text-slate-500">{mov.batchNumber}</td>
                     <td className={`px-4 py-3 text-right font-bold ${
                       mov.type === 'in' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'
