@@ -143,15 +143,15 @@ export default function StaffList() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
           <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">Active Team Size</span>
-          <h3 className="text-xl font-black mt-1">{staffList.filter(s => s.status === 'active').length} Cashiers</h3>
+          <h3 className="text-xl font-bold mt-1">{staffList.filter(s => s.status === 'active').length} Cashiers</h3>
         </div>
         <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
           <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">Store Sales Volume</span>
-          <h3 className="text-xl font-black mt-1 text-emerald-600 dark:text-emerald-400">GHS {staffAnalytics.totalSalesSum.toFixed(2)}</h3>
+          <h3 className="text-xl font-bold mt-1 text-emerald-600 dark:text-emerald-400">GHS {staffAnalytics.totalSalesSum.toFixed(2)}</h3>
         </div>
         <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
           <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">Commissions Allocated</span>
-          <h3 className="text-xl font-black mt-1 text-blue-600 dark:text-blue-400">GHS {staffAnalytics.totalCommissionsSum.toFixed(2)}</h3>
+          <h3 className="text-xl font-bold mt-1 text-blue-600 dark:text-blue-400">GHS {staffAnalytics.totalCommissionsSum.toFixed(2)}</h3>
         </div>
       </div>
 

@@ -228,19 +228,19 @@ export default function Reports() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
               <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">Gross Sales Revenue</span>
-              <h3 className="text-xl font-black mt-1.5 text-emerald-600 dark:text-emerald-400">GHS {financialData.grossRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
+              <h3 className="text-xl font-bold mt-1.5 text-emerald-600 dark:text-emerald-400">GHS {financialData.grossRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
               <p className="text-[9px] text-slate-400 mt-1 font-semibold">From {financialData.transactionsCount} completed transactions</p>
             </div>
             
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
               <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">Cost of Goods Sold (COGS)</span>
-              <h3 className="text-xl font-black mt-1.5 text-slate-700 dark:text-slate-200">GHS {financialData.totalCogs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
+              <h3 className="text-xl font-bold mt-1.5 text-slate-700 dark:text-slate-200">GHS {financialData.totalCogs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
               <p className="text-[9px] text-slate-400 mt-1 font-semibold">Total wholesale stock purchase value</p>
             </div>
 
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
               <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">Gross Profit</span>
-              <h3 className={`text-xl font-black mt-1.5 ${financialData.grossProfit >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-rose-500'}`}>
+              <h3 className={`text-xl font-bold mt-1.5 ${financialData.grossProfit >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-rose-500'}`}>
                 GHS {financialData.grossProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h3>
               <p className="text-[9px] text-slate-400 mt-1 font-semibold">Revenue minus COGS</p>
@@ -249,7 +249,7 @@ export default function Reports() {
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
               <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">Profit Margin (%)</span>
               <div className="flex items-center justify-between mt-1.5">
-                <h3 className="text-xl font-black">{financialData.profitMargin.toFixed(1)}%</h3>
+                <h3 className="text-xl font-bold">{financialData.profitMargin.toFixed(1)}%</h3>
                 <span className="p-1 bg-emerald-500/10 text-emerald-500 rounded-lg"><Percent className="w-4 h-4" /></span>
               </div>
               <p className="text-[9px] text-slate-400 mt-1 font-semibold">Profitability index</p>
@@ -304,26 +304,26 @@ export default function Reports() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
               <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">Total Taxes Collected</span>
-              <h3 className="text-xl font-black mt-1.5 text-emerald-600 dark:text-emerald-400">GHS {taxAuditData.totalTaxCollected.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
+              <h3 className="text-xl font-bold mt-1.5 text-emerald-600 dark:text-emerald-400">GHS {taxAuditData.totalTaxCollected.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
               <p className="text-[9px] text-slate-400 mt-1 font-semibold">Combined NHIL, GETFund, and VAT</p>
             </div>
             
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
               <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">VAT (12.5%) Portion</span>
-              <h3 className="text-xl font-black mt-1.5 text-slate-800 dark:text-slate-250">GHS {taxAuditData.vat.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
+              <h3 className="text-xl font-bold mt-1.5 text-slate-800 dark:text-slate-250">GHS {taxAuditData.vat.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
               <p className="text-[9px] text-slate-400 mt-1 font-semibold">Calculated on (base price + levies)</p>
             </div>
 
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
               <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">NHIL (2.5%) Portion</span>
-              <h3 className="text-xl font-black mt-1.5 text-slate-800 dark:text-slate-250">GHS {taxAuditData.nhil.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
+              <h3 className="text-xl font-bold mt-1.5 text-slate-800 dark:text-slate-250">GHS {taxAuditData.nhil.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
               <p className="text-[9px] text-slate-400 mt-1 font-semibold">2.5% National Health Insurance Levy</p>
             </div>
 
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
               <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">GETFund (2.5%) Portion</span>
               <div className="flex items-center justify-between mt-1.5">
-                <h3 className="text-xl font-black">GHS {taxAuditData.getFund.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
+                <h3 className="text-xl font-bold">GHS {taxAuditData.getFund.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
               </div>
               <p className="text-[9px] text-slate-400 mt-1 font-semibold">2.5% Education Trust Fund Levy</p>
             </div>
@@ -394,7 +394,7 @@ export default function Reports() {
                     </td>
                     <td className="px-4 py-3 font-extrabold text-slate-750 dark:text-slate-250">{mov.productName}</td>
                     <td className="px-4 py-3 font-mono text-slate-500">{mov.batchNumber}</td>
-                    <td className={`px-4 py-3 text-right font-black ${
+                    <td className={`px-4 py-3 text-right font-bold ${
                       mov.type === 'in' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'
                     }`}>
                       {mov.type === 'in' ? '+' : '-'}{mov.quantity} {mov.unit}

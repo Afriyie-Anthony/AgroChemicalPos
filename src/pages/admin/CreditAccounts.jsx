@@ -93,7 +93,7 @@ export default function CreditAccounts() {
         <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Total Outstanding Debt</span>
-            <h3 className="text-xl font-black text-rose-600 dark:text-rose-400">GHS {stats.totalOutstanding.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
+            <h3 className="text-xl font-bold text-rose-600 dark:text-rose-400">GHS {stats.totalOutstanding.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
           </div>
           <div className="p-3 bg-rose-50 dark:bg-rose-500/10 text-rose-550 dark:text-rose-400 rounded-xl">
             <CreditCard className="w-5 h-5" />
@@ -104,7 +104,7 @@ export default function CreditAccounts() {
         <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Active Debtors</span>
-            <h3 className="text-xl font-black">{stats.debtorsCount} Accounts</h3>
+            <h3 className="text-xl font-bold">{stats.debtorsCount} Accounts</h3>
           </div>
           <div className="p-3 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl">
             <ShieldAlert className="w-5 h-5" />
@@ -115,7 +115,7 @@ export default function CreditAccounts() {
         <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Avg Outstanding Debt</span>
-            <h3 className="text-xl font-black text-slate-700 dark:text-slate-250">GHS {stats.avgDebt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
+            <h3 className="text-xl font-bold text-slate-700 dark:text-slate-250">GHS {stats.avgDebt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
           </div>
           <div className="p-3 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl">
             <TrendingUp className="w-5 h-5" />
@@ -126,7 +126,7 @@ export default function CreditAccounts() {
         <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Credit Limit Exposure</span>
-            <h3 className="text-xl font-black">{stats.riskExposurePercentage.toFixed(1)}% Limit Used</h3>
+            <h3 className="text-xl font-bold">{stats.riskExposurePercentage.toFixed(1)}% Limit Used</h3>
           </div>
           <div className="p-3 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl">
             <DollarSign className="w-5 h-5" />
@@ -192,7 +192,7 @@ export default function CreditAccounts() {
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs font-semibold">
                     <span className="text-slate-400">Outstanding Debt</span>
-                    <span className="text-slate-800 dark:text-slate-100 font-black">
+                    <span className="text-slate-800 dark:text-slate-100 font-bold">
                       GHS {cust.outstandingCredit.toFixed(2)}
                     </span>
                   </div>
@@ -244,7 +244,7 @@ export default function CreditAccounts() {
                   }}
                   className={`py-2 text-[10px] font-bold rounded-xl transition-all flex items-center justify-center space-x-1 ${
                     cust.outstandingCredit > 0
-                      ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black shadow active:scale-[0.98]'
+                      ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow active:scale-[0.98]'
                       : 'bg-slate-100 dark:bg-slate-900 text-slate-400 dark:text-slate-650 cursor-not-allowed border border-slate-200 dark:border-slate-850'
                   }`}
                 >
@@ -379,7 +379,7 @@ export default function CreditAccounts() {
                             <td className="px-4 py-3 uppercase font-bold text-[10px]">{tx.paymentMethod}</td>
                             <td className="px-4 py-3 text-right text-slate-655 dark:text-slate-400">GHS {tx.subtotal.toFixed(2)}</td>
                             <td className="px-4 py-3 text-right text-slate-655 dark:text-slate-400">GHS {tx.tax.toFixed(2)}</td>
-                            <td className="px-4 py-3 text-right font-black">GHS {tx.total.toFixed(2)}</td>
+                            <td className="px-4 py-3 text-right font-bold">GHS {tx.total.toFixed(2)}</td>
                           </tr>
                         ))}
                       </tbody>

@@ -20,14 +20,15 @@ import {
   Menu,
   X,
   Sprout,
-  ChevronRight
+  ChevronRight,
+  Bell
 } from 'lucide-react';
 
 export default function Layout({ children }) {
   const { currentUser, activeShift, logout, theme, toggleTheme, products, customers } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleLogout = () => {
     logout();
@@ -91,20 +92,25 @@ export default function Layout({ children }) {
     <div className="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 overflow-hidden font-sans transition-colors duration-200">
       
       {/* Sidebar - Desktop and mobile sliding */}
-      <aside className={`fixed inset-y-0 left-0 z-20 flex flex-col w-64 bg-[#232323] border-r border-[#2d2d2d] text-slate-300 transition-transform duration-300 transform md:translate-x-0 md:relative ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-20 flex flex-col bg-[#f8fafc] dark:bg-[#070B12] text-slate-600 dark:text-slate-300 transition-all duration-300 transform md:translate-x-0 md:relative ${
+        sidebarOpen 
+          ? 'w-64 translate-x-0 border-r border-slate-200/80 dark:border-slate-900/80' 
+          : 'w-0 -translate-x-full md:translate-x-0 md:w-0 md:border-r-0 md:overflow-hidden'
+      }`}>
+        <div className="w-64 flex flex-col h-full flex-shrink-0">
         
         {/* Brand Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-[#2d2d2d]">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200/60 dark:border-slate-900/85">
           <div className="flex items-center space-x-3">
             <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/10">
               <Sprout className="w-5.5 h-5.5 text-white" />
             </div>
             <div>
-              <h1 className="font-extrabold text-sm tracking-tight text-white leading-none">AgroChem POS</h1>
-              <span className="text-[10px] text-slate-500 font-semibold tracking-wide uppercase mt-1 inline-block">Admin Panel</span>
+              <h1 className="font-extrabold text-sm tracking-tight text-slate-800 dark:text-white leading-none">AgroChem POS</h1>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold tracking-wide uppercase mt-1 inline-block">Admin Panel</span>
             </div>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="p-1 text-slate-400 hover:text-slate-200 md:hidden focus:outline-none">
+          <button onClick={() => setSidebarOpen(false)} className="p-1 text-slate-400 hover:text-slate-655 dark:text-slate-400 dark:hover:text-slate-200 md:hidden focus:outline-none">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -113,7 +119,7 @@ export default function Layout({ children }) {
         <nav className="flex-1 px-4 py-5 space-y-5 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-850">
           {menuSections.map((section, sIdx) => (
             <div key={sIdx} className="space-y-1.5">
-              <h4 className="px-4 text-[9px] font-bold text-slate-550 tracking-widest uppercase">
+              <h4 className="px-4 text-[9px] font-bold text-slate-800 dark:text-slate-500 tracking-widest uppercase">
                 {section.title}
               </h4>
               <div className="space-y-1">
@@ -129,22 +135,22 @@ export default function Layout({ children }) {
                       }}
                       className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-150 text-xs font-semibold group ${
                         isActive
-                          ? 'bg-[#edf7f2] text-[#0a6c3f] shadow-sm'
-                          : 'text-slate-400 hover:bg-[#2d2d2d]/50 hover:text-slate-100'
+                          ? 'bg-emerald-600 dark:bg-emerald-600 text-white dark:text-white shadow-md shadow-emerald-600/15'
+                          : 'text-slate-800 hover:bg-slate-100/70 hover:text-slate-850 dark:text-slate-400 dark:hover:bg-slate-900/50 dark:hover:text-slate-100'
                       }`}
                     >
                       <div className="flex items-center space-x-3">
-                        <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-[#0a6c3f]' : 'text-slate-500 group-hover:text-slate-300'}`} />
+                        <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-white dark:text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-350'}`} />
                         <span>{item.label}</span>
                       </div>
                       
                       {item.badge !== undefined && item.badge > 0 && (
                         <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ${
                           isActive 
-                            ? 'bg-[#0a6c3f] text-white' 
+                            ? 'bg-white text-emerald-700 dark:text-emerald-700' 
                             : item.label === 'Products' 
-                              ? 'bg-[#fbf4eb] text-[#c084fc] dark:bg-amber-500/10 dark:text-amber-400' 
-                              : 'bg-[#edf7f2] text-[#0a6c3f]'
+                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-250 dark:border-amber-500/20' 
+                              : 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-455 border border-emerald-100 dark:border-emerald-500/20'
                         }`}>
                           {item.badge}
                         </span>
@@ -158,32 +164,33 @@ export default function Layout({ children }) {
         </nav>
 
         {/* Profile Card Footer */}
-        <div className="p-4 border-t border-[#2d2d2d] bg-[#1a1a1a]/40">
+        <div className="p-4 border-t border-slate-200/60 dark:border-slate-900 bg-slate-100/40 dark:bg-[#1a1a1a]/40">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-[#2d2d2d]/60 transition-colors duration-150 text-left focus:outline-none group"
+            className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-200/40 dark:hover:bg-[#2d2d2d]/60 transition-colors duration-150 text-left focus:outline-none group"
           >
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full bg-emerald-700/80 border border-emerald-600/30 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                 KA
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-extrabold text-white truncate group-hover:text-emerald-400 transition-colors">Kwame Asante</p>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate">Administrator</p>
+                <p className="text-xs font-extrabold text-slate-800 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-450 transition-colors">Kwame Asante</p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate">Administrator</p>
               </div>
             </div>
-            <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-transform group-hover:translate-x-0.5" />
+            <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-350 transition-transform group-hover:translate-x-0.5" />
           </button>
+        </div>
         </div>
       </aside>
 
       {/* Main Panel Content Area */}
       <div className="flex flex-col flex-1 overflow-hidden">
         {/* Top Header Bar */}
-        <header className="flex items-center justify-between px-6 py-4 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-850 shadow-sm transition-colors duration-200">
+        <header className="flex items-center justify-between px-6 py-4 bg-[#ffffff] dark:bg-slate-950 border-b border-slate-200 dark:border-slate-850 shadow-sm transition-colors duration-200">
           {/* Left Panel Menu Trigger */}
           <div className="flex items-center space-x-3">
-            <button onClick={() => setSidebarOpen(true)} className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 md:hidden focus:outline-none rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 focus:outline-none rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900">
               <Menu className="w-6 h-6" />
             </button>
             <div className="hidden sm:flex items-center space-x-2">
@@ -206,34 +213,21 @@ export default function Layout({ children }) {
               {theme === 'dark' ? <Sun className="w-4.5 h-4.5 text-amber-400" /> : <Moon className="w-4.5 h-4.5 text-slate-600" />}
             </button>
 
-            {/* Shift Indicators */}
-            <div className="flex items-center space-x-2.5 px-3 py-1.5 rounded-full border bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-inner">
-              <span className={`w-2 h-2 rounded-full ${activeShift ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
-                Shift: {activeShift ? 'OPEN' : 'CLOSED'}
-              </span>
-              {activeShift && (
-                <span className="hidden md:inline text-[10px] text-slate-400 dark:text-slate-500 font-medium border-l border-slate-200 dark:border-slate-700 pl-2">
-                  Float: GHS {activeShift.openingFloat.toFixed(2)}
-                </span>
-              )}
-            </div>
-
+            {/* Notifications selector */}
             <button
-              onClick={() => navigate('/sales/shift')}
-              className={`text-xs px-3.5 py-1.5 font-semibold rounded-lg transition-all shadow-sm ${
-                activeShift
-                  ? 'bg-slate-100 dark:bg-slate-850 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-250 dark:border-slate-700'
-                  : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-md shadow-emerald-500/20'
-              }`}
+              title="Notifications"
+              className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all active:scale-95 border border-slate-200 dark:border-slate-800 focus:outline-none relative"
             >
-              {activeShift ? 'Manage Shift' : 'Open Shift'}
+              <Bell className="w-4.5 h-4.5" />
+              {lowStockCount + creditAccountCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full animate-pulse" />
+              )}
             </button>
           </div>
         </header>
 
         {/* Actual page layout */}
-        <main className="flex-1 overflow-y-auto bg-slate-50/50 dark:bg-slate-900/40 focus:outline-none p-6 text-slate-800 dark:text-slate-100">
+        <main className="flex-1 overflow-y-auto bg-slate-100 dark:bg-slate-900/40 focus:outline-none p-6 text-slate-800 dark:text-slate-100">
           {children}
         </main>
       </div>

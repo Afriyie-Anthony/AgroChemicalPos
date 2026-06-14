@@ -53,7 +53,7 @@ export default function Login() {
   const autofillDemo = (role) => {
     setError('');
     if (role === 'admin') {
-      setEmail('emmanuel@agrochem.com');
+      setEmail('kwame@agrochem.com');
       setPassword('admin123');
     } else {
       setEmail('rita@agrochem.com');
