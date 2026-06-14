@@ -2,11 +2,11 @@ import React, { useMemo } from 'react';
 import { Activity } from 'lucide-react';
 
 export default function SalesTrendChart({ filteredTransactions, timeFilter }) {
-  // Dynamic Sales Trend Line Data Points Generator
+  // Dynamic Sales Trend Bar Data Points Generator
   const salesTrendPoints = useMemo(() => {
     let intervals = [];
 
-    if (timeFilter === 'today') {
+    if (timeFilter === 'day') {
       // 6 intervals throughout the day
       intervals = [
         { label: '08:00', startHour: 0, endHour: 9, value: 0 },
@@ -23,33 +23,13 @@ export default function SalesTrendChart({ filteredTransactions, timeFilter }) {
         if (interval) interval.value += t.total;
       });
 
-    } else if (timeFilter === 'week') {
-      // Last 7 days
-      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      const today = new Date();
-      
-      // Initialize intervals for past 7 days in order
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(today.getDate() - i);
-        intervals.push({ label: days[d.getDay()], dateStr: d.toDateString(), value: 0 });
-      }
-
-      filteredTransactions.forEach(t => {
-        const txDayStr = new Date(t.createdAt).toDateString();
-        const interval = intervals.find(i => i.dateStr === txDayStr);
-        if (interval) interval.value += t.total;
-      });
-
-    } else {
-      // Month: 6 blocks of 5 days
+    } else if (timeFilter === 'month') {
+      // Month: 4 blocks of weeks (Days 1-7, 8-14, 15-21, 22+)
       intervals = [
-        { label: 'Days 1-5', startDay: 1, endDay: 5, value: 0 },
-        { label: 'Days 6-10', startDay: 6, endDay: 10, value: 0 },
-        { label: 'Days 11-15', startDay: 11, endDay: 15, value: 0 },
-        { label: 'Days 16-20', startDay: 16, endDay: 20, value: 0 },
-        { label: 'Days 21-25', startDay: 21, endDay: 25, value: 0 },
-        { label: 'Days 26+', startDay: 26, endDay: 32, value: 0 }
+        { label: 'Week 1', startDay: 1, endDay: 7, value: 0 },
+        { label: 'Week 2', startDay: 8, endDay: 14, value: 0 },
+        { label: 'Week 3', startDay: 15, endDay: 21, value: 0 },
+        { label: 'Week 4', startDay: 22, endDay: 32, value: 0 }
       ];
 
       filteredTransactions.forEach(t => {
@@ -57,49 +37,76 @@ export default function SalesTrendChart({ filteredTransactions, timeFilter }) {
         const interval = intervals.find(i => day >= i.startDay && day <= i.endDay);
         if (interval) interval.value += t.total;
       });
+
+    } else if (timeFilter === 'year') {
+      // Year: 12 months calendar aggregates (Jan - Dec)
+      intervals = [
+        { label: 'Jan', monthIndex: 0, value: 0 },
+        { label: 'Feb', monthIndex: 1, value: 0 },
+        { label: 'Mar', monthIndex: 2, value: 0 },
+        { label: 'Apr', monthIndex: 3, value: 0 },
+        { label: 'May', monthIndex: 4, value: 0 },
+        { label: 'Jun', monthIndex: 5, value: 0 },
+        { label: 'Jul', monthIndex: 6, value: 0 },
+        { label: 'Aug', monthIndex: 7, value: 0 },
+        { label: 'Sep', monthIndex: 8, value: 0 },
+        { label: 'Oct', monthIndex: 9, value: 0 },
+        { label: 'Nov', monthIndex: 10, value: 0 },
+        { label: 'Dec', monthIndex: 11, value: 0 }
+      ];
+
+      filteredTransactions.forEach(t => {
+        const month = new Date(t.createdAt).getMonth();
+        const interval = intervals.find(i => i.monthIndex === month);
+        if (interval) interval.value += t.total;
+      });
     }
 
     return intervals;
   }, [filteredTransactions, timeFilter]);
 
-  // SVG Calculations for Line Trend Chart
+  // SVG Calculations for Bar Trend Chart
   const svgTrendData = useMemo(() => {
-    const width = 500;
-    const height = 180;
+    const width = 1000;
+    const height = 190;
     const paddingLeft = 45;
     const paddingRight = 15;
-    const paddingTop = 15;
+    const paddingTop = 28;
     const paddingBottom = 25;
 
     const maxVal = Math.max(...salesTrendPoints.map(p => p.value), 200); // minimum scale limit
     const innerWidth = width - paddingLeft - paddingRight;
     const innerHeight = height - paddingTop - paddingBottom;
 
-    const coords = salesTrendPoints.map((p, idx) => {
-      const x = paddingLeft + (idx / (salesTrendPoints.length - 1)) * innerWidth;
-      const y = paddingTop + innerHeight - (p.value / maxVal) * innerHeight;
-      return { x, y, label: p.label, value: p.value };
+    const numPoints = salesTrendPoints.length;
+    const step = innerWidth / numPoints;
+    const barWidth = step * 0.55; // Sized nicely to leave room between bars
+
+    const bars = salesTrendPoints.map((p, idx) => {
+      const centerX = paddingLeft + (idx + 0.5) * step;
+      const x = centerX - barWidth / 2;
+      const valHeight = (p.value / maxVal) * innerHeight;
+      const y = paddingTop + innerHeight - valHeight;
+      return { 
+        x, 
+        y, 
+        width: barWidth, 
+        height: valHeight, 
+        label: p.label, 
+        value: p.value, 
+        centerX 
+      };
     });
 
-    let linePath = '';
-    let areaPath = '';
-
-    if (coords.length > 0) {
-      // Build line path
-      linePath = `M ${coords[0].x} ${coords[0].y} ` + coords.slice(1).map(c => `L ${c.x} ${c.y}`).join(' ');
-      // Build area path (closes at bottom edge)
-      areaPath = `${linePath} L ${coords[coords.length - 1].x} ${paddingTop + innerHeight} L ${coords[0].x} ${paddingTop + innerHeight} Z`;
-    }
-
-    return { coords, linePath, areaPath, width, height, maxVal, innerHeight, paddingTop, paddingLeft, innerWidth };
+    return { bars, width, height, maxVal, innerHeight, paddingTop, paddingLeft, innerWidth };
   }, [salesTrendPoints]);
 
   return (
     <div className="lg:col-span-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <Activity className="w-4.5 h-4.5 text-emerald-505" />
-          <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">Revenues Trend curve</h3>
+          <Activity className="w-4.5 h-4.5 text-emerald-500" />
+          <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">Revenue Trend</h3>
         </div>
         <span className="text-[9px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 px-2 py-0.5 rounded uppercase">
           Live updates
@@ -107,15 +114,14 @@ export default function SalesTrendChart({ filteredTransactions, timeFilter }) {
       </div>
 
       <div className="relative pt-2">
-        {/* Custom SVG Line Chart */}
         <svg 
           viewBox={`0 0 ${svgTrendData.width} ${svgTrendData.height}`} 
           className="w-full h-44 overflow-visible"
         >
           <defs>
-            <linearGradient id="salesAreaGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+            <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#10b981" stopOpacity="1" />
+              <stop offset="100%" stopColor="#059669" stopOpacity="0.25" />
             </linearGradient>
           </defs>
 
@@ -139,53 +145,64 @@ export default function SalesTrendChart({ filteredTransactions, timeFilter }) {
                   textAnchor="end" 
                   className="fill-slate-400 dark:fill-slate-500 font-bold text-[8px] font-mono"
                 >
-                  {labelVal > 1000 ? `${(labelVal / 1000).toFixed(1)}k` : labelVal}
+                  {labelVal >= 1000 ? `${(labelVal / 1000).toFixed(1)}k` : labelVal}
                 </text>
               </g>
             );
           })}
 
-          {/* Area path under line */}
-          {svgTrendData.areaPath && (
-            <path d={svgTrendData.areaPath} fill="url(#salesAreaGradient)" />
-          )}
-
-          {/* Highlight path line */}
-          {svgTrendData.linePath && (
-            <path 
-              d={svgTrendData.linePath} 
-              fill="none" 
-              stroke="#10b981" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-            />
-          )}
-
-          {/* Data points markers */}
-          {svgTrendData.coords.map((c, i) => (
-            <g key={i} className="group/dot cursor-pointer">
-              <circle 
-                cx={c.x} 
-                cy={c.y} 
-                r="4" 
-                className="fill-emerald-500 stroke-white dark:stroke-slate-950 stroke-2 hover:r-5 transition-all" 
+          {/* Bars Rendering */}
+          {svgTrendData.bars.map((bar, i) => (
+            <g key={i} className="group cursor-pointer">
+              {/* Highlight background column effect on hover */}
+              <rect
+                x={bar.centerX - (bar.width * 0.9)}
+                y={svgTrendData.paddingTop - 6}
+                width={bar.width * 1.8}
+                height={svgTrendData.innerHeight + 12}
+                className="fill-slate-100/50 dark:fill-slate-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none"
+                rx="4"
               />
+
+              {/* The SVG bar rectangle */}
+              <rect
+                x={bar.x}
+                y={bar.y}
+                width={bar.width}
+                height={Math.max(bar.height, 2)}
+                fill="url(#barGradient)"
+                rx="3.5"
+                className="transition-all duration-200 group-hover:brightness-110"
+              />
+
+              {/* Tooltip showing value on hover */}
+              <g className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                <rect
+                  x={bar.centerX - 45}
+                  y={bar.y - 23}
+                  width="90"
+                  height="16"
+                  rx="4"
+                  className="fill-slate-900 dark:fill-slate-100 filter drop-shadow-sm"
+                />
+                <text 
+                  x={bar.centerX} 
+                  y={bar.y - 12} 
+                  textAnchor="middle" 
+                  className="fill-white dark:fill-slate-900 text-[8px] font-bold font-mono"
+                >
+                  GHS {bar.value.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                </text>
+              </g>
+
+              {/* Label at the bottom */}
               <text 
-                x={c.x} 
-                y={c.y - 8} 
-                textAnchor="middle" 
-                className="fill-slate-700 dark:fill-slate-350 text-[8px] font-bold font-mono opacity-0 group-hover/dot:opacity-100 transition-opacity bg-white px-1 py-0.5 rounded shadow"
-              >
-                {c.value.toFixed(0)}
-              </text>
-              <text 
-                x={c.x} 
+                x={bar.centerX} 
                 y={svgTrendData.height - 8} 
                 textAnchor="middle" 
-                className="fill-slate-450 dark:fill-slate-500 font-bold text-[8px]"
+                className="fill-slate-400 dark:fill-slate-500 font-bold text-[8px]"
               >
-                {c.label}
+                {bar.label}
               </text>
             </g>
           ))}

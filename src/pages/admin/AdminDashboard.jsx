@@ -16,26 +16,25 @@ import CategoryDistributionChart from '../../components/dashboard/admin/Category
 
 export default function AdminDashboard() {
   const { products, customers, transactions } = useStore();
-  const [timeFilter, setTimeFilter] = useState('today'); // 'today', 'week', 'month'
+  const [timeFilter, setTimeFilter] = useState('day'); // 'day', 'month', 'year'
 
   // Filter transactions dynamically based on selected timeframe
   const filteredTransactions = useMemo(() => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
 
     return transactions.filter(t => {
       if (t.status === 'voided') return false; // exclude voided sales
 
       const txDate = new Date(t.createdAt);
-      const diffTime = Math.abs(today - txDate);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      if (timeFilter === 'today') {
-        return txDate >= today;
-      } else if (timeFilter === 'week') {
-        return diffDays <= 7;
+      if (timeFilter === 'day') {
+        return txDate.toDateString() === today.toDateString();
       } else if (timeFilter === 'month') {
-        return diffDays <= 30;
+        return txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear;
+      } else if (timeFilter === 'year') {
+        return txDate.getFullYear() === currentYear;
       }
       return true;
     });
@@ -142,24 +141,14 @@ export default function AdminDashboard() {
         </div>
         <div className="flex space-x-2 bg-white dark:bg-slate-950 p-1.5 rounded-xl border border-slate-200 dark:border-slate-850 self-start shadow-sm transition-colors duration-200">
           <button
-            onClick={() => setTimeFilter('today')}
+            onClick={() => setTimeFilter('day')}
             className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
-              timeFilter === 'today'
+              timeFilter === 'day'
                 ? 'bg-emerald-500 text-slate-950 shadow-sm'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
-            Today
-          </button>
-          <button
-            onClick={() => setTimeFilter('week')}
-            className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
-              timeFilter === 'week'
-                ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            This Week
+            Day
           </button>
           <button
             onClick={() => setTimeFilter('month')}
@@ -170,6 +159,16 @@ export default function AdminDashboard() {
             }`}
           >
             Month
+          </button>
+          <button
+            onClick={() => setTimeFilter('year')}
+            className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
+              timeFilter === 'year'
+                ? 'bg-emerald-500 text-slate-950 shadow-sm'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
+          >
+            Year
           </button>
         </div>
       </div>
