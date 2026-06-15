@@ -507,15 +507,15 @@ export default function Inventory() {
                 <div className="grid grid-cols-3 gap-4">
                   <div className="bg-slate-50/50 dark:bg-slate-950/30 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl p-4 text-center">
                     <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase">Cost Price</span>
-                    <span className="block text-sm font-extrabold text-slate-800 dark:text-slate-200 mt-1">{formatCurrency(activeProductForDetails.costPrice)}</span>
+                    <span className="block text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">{formatCurrency(activeProductForDetails.costPrice)}</span>
                   </div>
                   <div className="bg-emerald-500/5 dark:bg-emerald-500/5 border border-emerald-500/10 dark:border-emerald-500/15 rounded-2xl p-4 text-center">
                     <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase">Retail Price</span>
-                    <span className="block text-sm font-extrabold text-emerald-700 dark:text-emerald-400 mt-1">{formatCurrency(activeProductForDetails.retailPrice)}</span>
+                    <span className="block text-sm font-bold text-emerald-700 dark:text-emerald-400 mt-1">{formatCurrency(activeProductForDetails.retailPrice)}</span>
                   </div>
                   <div className="bg-slate-50/50 dark:bg-slate-950/30 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl p-4 text-center">
                     <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase">Wholesale Price</span>
-                    <span className="block text-sm font-extrabold text-slate-800 dark:text-slate-200 mt-1">{formatCurrency(activeProductForDetails.wholesalePrice)}</span>
+                    <span className="block text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">{formatCurrency(activeProductForDetails.wholesalePrice)}</span>
                   </div>
                 </div>
               </div>
@@ -537,11 +537,11 @@ export default function Inventory() {
                       <div key={b.id} className="bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between text-[11px] relative overflow-hidden shadow-sm">
                         <div className="flex justify-between items-start">
                           <span className="font-semibold text-slate-500 dark:text-slate-400">No: <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">{b.batchNumber}</span></span>
-                          <span className="font-extrabold text-slate-800 dark:text-slate-200">{b.quantity} remaining</span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200">{b.quantity} remaining</span>
                         </div>
                         <div className="flex justify-between items-center mt-3">
                           <span className="text-slate-400 dark:text-slate-500">Expiry: {formatDate(b.expiryDate)}</span>
-                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold ${
+                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
                             isExpired ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' :
                             isNearExpiry ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' :
                             'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50'

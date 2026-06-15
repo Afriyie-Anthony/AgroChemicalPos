@@ -151,78 +151,6 @@ export default function Reports() {
     }));
   }, [filteredExpenses]);
 
-  // ==========================================
-  // 2. GRA VAT COMPLIANCE TAX CALCULATION
-  // ==========================================
-  const taxData = useMemo(() => {
-    let totalTaxableSalesNet = 0;
-    let totalExemptSales = 0;
-    let totalNhil = 0;
-    let totalGetFund = 0;
-    let totalVat = 0;
-    let totalTaxCollected = 0;
-
-    const list = filteredTransactions.map(t => {
-      let trxTaxableNet = 0;
-      let trxExempt = 0;
-      let trxNhil = 0;
-      let trxGetFund = 0;
-      let trxVat = 0;
-
-      t.items.forEach(item => {
-        const grossValue = (item.price - item.discount) * item.quantity;
-        if (item.taxExempt) {
-          trxExempt += grossValue;
-        } else {
-          const net = grossValue / 1.18125;
-          trxTaxableNet += net;
-          trxNhil += net * 0.025;
-          trxGetFund += net * 0.025;
-          trxVat += net * 0.13125;
-        }
-      });
-
-      const trxTotalTax = trxNhil + trxGetFund + trxVat;
-      
-      totalTaxableSalesNet += trxTaxableNet;
-      totalExemptSales += trxExempt;
-      totalNhil += trxNhil;
-      totalGetFund += trxGetFund;
-      totalVat += trxVat;
-      totalTaxCollected += trxTotalTax;
-
-      return {
-        id: t.id,
-        code: t.transactionCode,
-        date: t.createdAt,
-        taxableNet: trxTaxableNet,
-        exempt: trxExempt,
-        levies: trxNhil + trxGetFund,
-        vat: trxVat,
-        totalTax: trxTotalTax,
-        grossTotal: t.total
-      };
-    });
-
-    return {
-      list,
-      totalTaxableSalesNet,
-      totalExemptSales,
-      totalNhil,
-      totalGetFund,
-      totalVat,
-      totalTaxCollected
-    };
-  }, [filteredTransactions]);
-
-  // Tax distribution chart data (donut)
-  const taxDonutData = useMemo(() => {
-    return [
-      { name: 'NHIL (2.5%)', value: taxData.totalNhil, color: '#3b82f6' },
-      { name: 'GETFund (2.5%)', value: taxData.totalGetFund, color: '#f59e0b' },
-      { name: 'VAT (12.5%)', value: taxData.totalVat, color: '#10b981' }
-    ];
-  }, [taxData]);
 
   // ==========================================
   // 3. INVENTORY & ASSETS CALCULATION
@@ -473,18 +401,6 @@ export default function Reports() {
         ['Card Sales Swipe', financialData.paymentBreakdown.card.toFixed(2)],
         ['Outstanding Customer Credit', financialData.paymentBreakdown.credit.toFixed(2)]
       ];
-    } else if (activeTab === 'tax') {
-      headers = ['Receipt Ref', 'Date/Time', 'Taxable Net (GHS)', 'Exempt Sales (GHS)', 'GRA Levies (GHS)', 'VAT (12.5%) (GHS)', 'Total Tax (GHS)', 'Gross Total (GHS)'];
-      rows = taxData.list.map(t => [
-        t.code,
-        new Date(t.date).toLocaleString('en-GB'),
-        t.taxableNet.toFixed(2),
-        t.exempt.toFixed(2),
-        t.levies.toFixed(2),
-        t.vat.toFixed(2),
-        t.totalTax.toFixed(2),
-        t.grossTotal.toFixed(2)
-      ]);
     } else if (activeTab === 'inventory') {
       headers = ['Product Name', 'Remaining Stock', 'Reorder Level', 'Status'];
       rows = products.map(p => {
@@ -587,7 +503,6 @@ export default function Reports() {
       <div className="flex overflow-x-auto pb-1.5 border-b border-slate-200 dark:border-slate-800 scrollbar-thin scrollbar-thumb-slate-800">
         {[
           { id: 'financials', label: 'Financials P&L', icon: TrendingUp },
-          { id: 'tax', label: 'VAT Tax (GRA)', icon: ShieldCheck },
           { id: 'inventory', label: 'Inventory Assets', icon: Boxes },
           { id: 'debtors', label: 'Debtors & Credit', icon: CreditCard },
           { id: 'staff', label: 'Staff Commission', icon: UserCheck },
@@ -659,7 +574,7 @@ export default function Reports() {
               </div>
               
               <div className="py-4">
-                <h2 className={`text-3xl font-extrabold tracking-tight ${netProfit >= 0 ? 'text-blue-500' : 'text-rose-500'}`}>
+                <h2 className={`text-3xl font-bold tracking-tight ${netProfit >= 0 ? 'text-blue-500' : 'text-rose-500'}`}>
                   {formatCurrency(netProfit)}
                 </h2>
                 <div className="flex items-center space-x-1.5 mt-2">
@@ -758,122 +673,6 @@ export default function Reports() {
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================
-          TAB 2: GRA VAT COMPLIANCE TAX REPORT
-          ======================================================== */}
-      {activeTab === 'tax' && (
-        <div className="space-y-6 animate-in fade-in duration-150">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
-              <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">Taxable Sales (Net)</span>
-              <h3 className="text-xl font-bold mt-1.5 text-slate-800 dark:text-slate-100">
-                {formatCurrency(taxData.totalTaxableSalesNet)}
-              </h3>
-              <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-1 font-semibold">Net standard rated goods value</p>
-            </div>
-            
-            <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
-              <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">Exempt Sales</span>
-              <h3 className="text-xl font-bold mt-1.5 text-blue-500">
-                {formatCurrency(taxData.totalExemptSales)}
-              </h3>
-              <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-1 font-semibold">Exempt tools & machinery sales</p>
-            </div>
-
-            <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
-              <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">Total GRA Levies (5%)</span>
-              <h3 className="text-xl font-bold mt-1.5 text-slate-800 dark:text-slate-100">
-                {formatCurrency(taxData.totalNhil + taxData.totalGetFund)}
-              </h3>
-              <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-1 font-semibold">NHIL (2.5%) + GETFund (2.5%)</p>
-            </div>
-
-            <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
-              <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">VAT Collected (12.5%)</span>
-              <h3 className="text-xl font-bold mt-1.5 text-emerald-500">
-                {formatCurrency(taxData.totalVat)}
-              </h3>
-              <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-1 font-semibold">VAT on compound net + levies</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Tax Donut Distribution Chart */}
-            <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-4 lg:col-span-1 flex flex-col justify-between">
-              <div>
-                <h3 className="font-bold text-sm text-slate-805 dark:text-slate-202">GRA Tax Split Distribution</h3>
-                <p className="text-[10px] text-slate-400 dark:text-slate-500">Composition of GHS {taxData.totalTaxCollected.toFixed(2)} tax collected</p>
-              </div>
-
-              {taxData.totalTaxCollected === 0 ? (
-                <div className="py-10 text-center text-xs text-slate-500">No tax collected.</div>
-              ) : (
-                <div className="flex flex-col items-center">
-                  <div className="h-40 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={taxDonutData} dataKey="value" innerRadius={40} outerRadius={60} paddingAngle={4}>
-                          {taxDonutData.map((entry, idx) => (
-                            <Cell key={`cell-${idx}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip contentStyle={rechartsTooltipStyle} formatter={(val) => `GHS ${val.toFixed(2)}`} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="w-full space-y-2 mt-2 text-[10px]">
-                    {taxDonutData.map((item, idx) => (
-                      <div key={idx} className="flex justify-between items-center">
-                        <div className="flex items-center space-x-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                          <span className="text-slate-450 font-bold">{item.name}</span>
-                        </div>
-                        <span className="font-bold text-slate-700 dark:text-slate-350">{formatCurrency(item.value)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Audit Table */}
-            <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-4 lg:col-span-2">
-              <h3 className="font-bold text-sm text-slate-805 dark:text-slate-205">Tax Ledger Transactions</h3>
-              <div className="premium-table-container">
-                <table className="premium-table premium-table-zebra">
-                  <thead>
-                    <tr>
-                      <th>Ref Code</th>
-                      <th>Date</th>
-                      <th className="text-right">Net Taxable</th>
-                      <th className="text-right">VAT (12.5%)</th>
-                      <th className="text-right">Total Tax</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {taxData.list.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="text-center py-10 text-slate-450">No taxable items billed</td>
-                      </tr>
-                    ) : (
-                      taxData.list.slice(0, 6).map(t => (
-                        <tr key={t.id}>
-                          <td className="font-semibold">{t.code}</td>
-                          <td className="text-slate-400">{formatDate(t.date)}</td>
-                          <td className="text-right font-medium">{formatCurrency(t.taxableNet)}</td>
-                          <td className="text-right text-slate-500">{formatCurrency(t.vat)}</td>
-                          <td className="text-right font-bold text-emerald-500">{formatCurrency(t.totalTax)}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
             </div>
           </div>
         </div>
