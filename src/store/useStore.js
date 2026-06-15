@@ -270,6 +270,7 @@ export const useStore = create((set, get) => ({
   products: INITIAL_PRODUCTS,
   suppliers: INITIAL_SUPPLIERS,
   purchaseOrders: INITIAL_PO,
+  adjustments: [],
 
   addProduct: (product) => {
     const newProduct = {
@@ -290,18 +291,39 @@ export const useStore = create((set, get) => ({
   },
 
   adjustStock: (productId, batchId, quantityChange, reason) => {
-    set(state => ({
-      products: state.products.map(p => {
-        if (p.id !== productId) return p;
-        return {
-          ...p,
-          batches: p.batches.map(b => {
-            if (b.id !== batchId) return b;
-            return { ...b, quantity: Math.max(0, b.quantity + quantityChange) };
-          })
-        };
-      })
-    }));
+    if (quantityChange === 0) return;
+
+    set(state => {
+      const product = state.products.find(p => p.id === productId);
+      const batch = product?.batches.find(b => b.id === batchId);
+      if (!product || !batch) return {};
+
+      const newAdjustment = {
+        id: `adj-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        productId,
+        productName: product.name,
+        batchId,
+        batchNumber: batch.batchNumber,
+        quantityChange,
+        reason,
+        date: new Date().toISOString(),
+        user: state.currentUser?.name || 'System Admin'
+      };
+
+      return {
+        products: state.products.map(p => {
+          if (p.id !== productId) return p;
+          return {
+            ...p,
+            batches: p.batches.map(b => {
+              if (b.id !== batchId) return b;
+              return { ...b, quantity: Math.max(0, b.quantity + quantityChange) };
+            })
+          };
+        }),
+        adjustments: [newAdjustment, ...(state.adjustments || [])]
+      };
+    });
   },
 
   // SUPPLIER MANAGEMENT ACTIONS
@@ -447,45 +469,60 @@ export const useStore = create((set, get) => ({
   setSelectedCustomer: (customer) => set({ selectedCustomer: customer }),
 
   addToCart: (product, batchId, qty = 1) => {
-    const batch = product.batches.find(b => b.id === batchId);
-    if (!batch) return;
+    // FEFO split-lot allocation strategy
+    // Get all available batches sorted by expiry date
+    const sortedBatches = [...product.batches]
+      .filter(b => b.quantity > 0)
+      .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+
+    if (sortedBatches.length === 0) return;
 
     set(state => {
-      const existingItem = state.cart.find(item => item.productId === product.id && item.batchId === batchId);
-      const currentQtyInCart = existingItem ? existingItem.quantity : 0;
-      if (currentQtyInCart + qty > batch.quantity) {
+      let remainingQty = qty;
+      let updatedCart = [...state.cart];
+
+      for (const batch of sortedBatches) {
+        if (remainingQty <= 0) break;
+
+        const existingItem = updatedCart.find(item => item.productId === product.id && item.batchId === batch.id);
+        const currentQtyInCart = existingItem ? existingItem.quantity : 0;
+        const availableInBatch = batch.quantity - currentQtyInCart;
+
+        if (availableInBatch <= 0) continue;
+
+        const allocatedFromBatch = Math.min(remainingQty, availableInBatch);
+        remainingQty -= allocatedFromBatch;
+
+        if (existingItem) {
+          updatedCart = updatedCart.map(item =>
+            (item.productId === product.id && item.batchId === batch.id)
+              ? { ...item, quantity: item.quantity + allocatedFromBatch }
+              : item
+          );
+        } else {
+          const itemPrice = state.wholesaleMode ? product.wholesalePrice : product.retailPrice;
+          updatedCart.push({
+            productId: product.id,
+            name: product.name,
+            category: product.category,
+            unit: product.unit,
+            batchId: batch.id,
+            batchNumber: batch.batchNumber,
+            expiryDate: batch.expiryDate,
+            price: itemPrice,
+            quantity: allocatedFromBatch,
+            discount: 0,
+            taxExempt: product.category === 'Farm Tools & Equipment'
+          });
+        }
+      }
+
+      // If we cannot allocate the full requested quantity across all batches, reject the operation
+      if (remainingQty > 0) {
         return {};
       }
 
-      if (existingItem) {
-        return {
-          cart: state.cart.map(item => 
-            (item.productId === product.id && item.batchId === batchId)
-              ? { ...item, quantity: item.quantity + qty }
-              : item
-          )
-        };
-      } else {
-        const itemPrice = state.wholesaleMode ? product.wholesalePrice : product.retailPrice;
-        return {
-          cart: [
-            ...state.cart,
-            {
-              productId: product.id,
-              name: product.name,
-              category: product.category,
-              unit: product.unit,
-              batchId: batch.id,
-              batchNumber: batch.batchNumber,
-              expiryDate: batch.expiryDate,
-              price: itemPrice,
-              quantity: qty,
-              discount: 0,
-              taxExempt: product.category === 'Farm Tools & Equipment'
-            }
-          ]
-        };
-      }
+      return { cart: updatedCart };
     });
   },
 

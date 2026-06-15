@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export default function Reports() {
-  const { transactions, products, purchaseOrders } = useStore();
+  const { transactions, products, purchaseOrders, adjustments } = useStore();
   const [activeTab, setActiveTab] = useState('financials'); // 'financials', 'tax', 'movement'
   const [dateFilter, setDateFilter] = useState('all'); // 'all', 'today', 'week', 'month'
 
@@ -123,9 +123,37 @@ export default function Reports() {
       }
     });
 
+    // 3. Manual Stock Adjustments Logs
+    (adjustments || []).forEach(adj => {
+      // Avoid recording 'sale' or 'void' since they are already captured above
+      if (adj.reason === 'sale' || adj.reason === 'void') return;
+
+      const qty = Math.abs(adj.quantityChange);
+      const direction = adj.quantityChange < 0 ? 'out' : 'in';
+      const reasonLabels = {
+        damage: 'Spillage / Damage',
+        theft: 'Theft / Write-off',
+        'count correction': 'Count Correction',
+        'promotional give-away': 'Promo Giveaway'
+      };
+
+      movements.push({
+        id: adj.id,
+        date: adj.date,
+        type: direction,
+        typeLabel: `Adjustment (${reasonLabels[adj.reason] || adj.reason})`,
+        productName: adj.productName,
+        quantity: qty,
+        unit: 'Units',
+        batchNumber: adj.batchNumber,
+        reference: 'INV-ADJ',
+        user: adj.user
+      });
+    });
+
     // Sort by Date Descending
     return movements.sort((a, b) => new Date(b.date) - new Date(a.date));
-  }, [transactions, purchaseOrders]);
+  }, [transactions, purchaseOrders, adjustments]);
 
   return (
     <div className="space-y-6 text-slate-800 dark:text-slate-100 font-sans">
