@@ -254,7 +254,7 @@ export const useStore = create((set, get) => ({
   currentUser: null,
   isAuthenticated: false,
   staffList: MOCK_STAFF,
-  theme: 'dark', // 'light' or 'dark'
+  theme: 'light', // 'light' or 'dark'
 
   toggleTheme: () => set(state => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
 

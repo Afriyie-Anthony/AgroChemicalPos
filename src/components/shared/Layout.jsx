@@ -30,7 +30,7 @@ export default function Layout({ children }) {
   const { currentUser, logout, theme, toggleTheme, products, customers } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
 
   const handleLogout = () => {
     logout();
@@ -95,8 +95,16 @@ export default function Layout({ children }) {
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 overflow-hidden font-sans transition-colors duration-200">
       
+      {/* Mobile Sidebar Backdrop overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden animate-in fade-in duration-200"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar - Desktop and mobile sliding */}
-      <aside className={`fixed inset-y-0 left-0 z-20 flex flex-col bg-[#f8fafc] dark:bg-[#070B12] text-slate-600 dark:text-slate-300 transition-all duration-300 transform md:translate-x-0 md:relative ${
+      <aside className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-300 transition-all duration-300 transform md:translate-x-0 md:relative ${
         sidebarOpen 
           ? 'w-64 translate-x-0 border-r border-slate-200/80 dark:border-slate-900/80' 
           : 'w-0 -translate-x-full md:translate-x-0 md:w-0 md:border-r-0 md:overflow-hidden'
