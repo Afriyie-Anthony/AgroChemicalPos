@@ -359,9 +359,9 @@ export default function CreditAccounts() {
                     <p className="text-xs text-slate-450 font-bold">No registered sales history found for this account.</p>
                   </div>
                 ) : (
-                  <div className="border border-slate-200 dark:border-slate-850 rounded-2xl overflow-hidden bg-white dark:bg-slate-950">
-                    <table className="w-full text-xs text-left">
-                      <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-850 text-[10px] font-bold text-slate-400 uppercase">
+                  <div className="premium-table-container">
+                    <table className="premium-table premium-table-zebra">
+                      <thead>
                         <tr>
                           <th className="px-4 py-3">Txn Code</th>
                           <th className="px-4 py-3">Date</th>

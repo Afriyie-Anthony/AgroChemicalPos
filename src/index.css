@@ -33,3 +33,89 @@
     visibility: hidden !important;
   }
 }
+
+/* Premium Table Layout Design System */
+.premium-table-container {
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+  transition: all 0.2s ease-in-out;
+}
+
+.dark .premium-table-container {
+  background-color: rgba(7, 11, 18, 0.4);
+  border-color: rgba(30, 41, 59, 0.4);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.premium-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.premium-table thead tr {
+  background-color: rgba(248, 250, 252, 0.8);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dark .premium-table thead tr {
+  background-color: rgba(15, 23, 42, 0.4);
+  border-bottom-color: rgba(30, 41, 59, 0.4);
+  color: #94a3b8;
+}
+
+.premium-table th {
+  padding: 16px 24px;
+  font-weight: 700;
+}
+
+.premium-table tbody tr {
+  border-bottom: 1px solid rgba(241, 245, 249, 0.8);
+  transition: all 0.15s ease-in-out;
+}
+
+.dark .premium-table tbody tr {
+  border-bottom-color: rgba(30, 41, 59, 0.2);
+}
+
+.premium-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.premium-table tbody tr:hover {
+  background-color: rgba(248, 250, 252, 0.6);
+}
+
+.dark .premium-table tbody tr:hover {
+  background-color: rgba(30, 41, 59, 0.2);
+}
+
+.premium-table td {
+  padding: 16px 24px;
+  vertical-align: middle;
+  color: #334155;
+  font-size: 12px;
+}
+
+.dark .premium-table td {
+  color: #cbd5e1;
+}
+
+/* Alternating zebra row backgrounds for clean spacing */
+.premium-table-zebra tbody tr:nth-child(even) {
+  background-color: rgba(248, 250, 252, 0.3);
+}
+
+.dark .premium-table-zebra tbody tr:nth-child(even) {
+  background-color: rgba(15, 23, 42, 0.1);
+}

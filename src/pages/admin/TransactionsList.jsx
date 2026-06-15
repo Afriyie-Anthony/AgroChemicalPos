@@ -84,11 +84,11 @@ export default function TransactionsList() {
       </div>
 
       {/* Table grid */}
-      <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm dark:shadow-2xl">
+      <div className="premium-table-container">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="premium-table">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-955/80 border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase">
+              <tr>
                 <th className="px-6 py-4">Trx Code</th>
                 <th className="px-6 py-4">Date & Time</th>
                 <th className="px-6 py-4">Customer</th>
