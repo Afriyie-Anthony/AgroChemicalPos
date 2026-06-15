@@ -31,8 +31,9 @@ import TopProductsChart from '../../components/dashboard/admin/TopProductsChart'
 import CategoryDistributionChart from '../../components/dashboard/admin/CategoryDistributionChart';
 
 export default function AdminDashboard() {
-  const { products, customers, transactions, expenses } = useStore();
+  const { products, customers, transactions, expenses, currentUser } = useStore();
   const [timeFilter, setTimeFilter] = useState('day'); // 'day', 'month', 'year'
+  const isAdmin = currentUser?.role === 'admin';
 
   // Filter transactions dynamically based on selected timeframe
   const filteredTransactions = useMemo(() => {
@@ -223,41 +224,47 @@ export default function AdminDashboard() {
       {/* Header and Time Filters */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Admin Command Center</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Real-time performance analytics for your agro-chemical shop</p>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {isAdmin ? 'Admin Command Center' : 'Sales Command Center'}
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            {isAdmin ? 'Real-time performance analytics for your agro-chemical shop' : 'Daily sales overview and stock tracking'}
+          </p>
         </div>
-        <div className="flex space-x-2 bg-white dark:bg-slate-950 p-1.5 rounded-xl border border-slate-200 dark:border-slate-850 self-start shadow-sm transition-colors duration-200">
-          <button
-            onClick={() => setTimeFilter('day')}
-            className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
-              timeFilter === 'day'
-                ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            Day
-          </button>
-          <button
-            onClick={() => setTimeFilter('month')}
-            className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
-              timeFilter === 'month'
-                ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            Month
-          </button>
-          <button
-            onClick={() => setTimeFilter('year')}
-            className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
-              timeFilter === 'year'
-                ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            Year
-          </button>
-        </div>
+        {isAdmin && (
+          <div className="flex space-x-2 bg-white dark:bg-slate-950 p-1.5 rounded-xl border border-slate-200 dark:border-slate-850 self-start shadow-sm transition-colors duration-200">
+            <button
+              onClick={() => setTimeFilter('day')}
+              className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                timeFilter === 'day'
+                  ? 'bg-emerald-500 text-slate-950 shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              Day
+            </button>
+            <button
+              onClick={() => setTimeFilter('month')}
+              className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                timeFilter === 'month'
+                  ? 'bg-emerald-500 text-slate-950 shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              Month
+            </button>
+            <button
+              onClick={() => setTimeFilter('year')}
+              className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                timeFilter === 'year'
+                  ? 'bg-emerald-500 text-slate-950 shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              Year
+            </button>
+          </div>
+        )}
       </div>
 
       {/* KPI Stats Widgets */}
@@ -265,7 +272,9 @@ export default function AdminDashboard() {
         {/* Gross Revenue */}
         <div className="bg-gradient-to-br from-emerald-50/40 to-emerald-100/30 dark:from-slate-950 dark:to-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/50 p-5 rounded-2xl shadow-sm hover:border-emerald-400 dark:hover:border-emerald-700/80 transition-all flex flex-col justify-between">
           <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Gross Revenue</span>
+            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              {isAdmin ? 'Gross Revenue' : 'Revenue for the Day'}
+            </span>
             <span className="p-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg">
               <DollarSign className="w-4 h-4" />
             </span>
@@ -279,52 +288,58 @@ export default function AdminDashboard() {
         </div>
 
         {/* Total Expenses */}
-        <div className="bg-gradient-to-br from-rose-50/40 to-rose-100/30 dark:from-slate-950 dark:to-rose-950/20 border border-rose-200/80 dark:border-rose-900/50 p-5 rounded-2xl shadow-sm hover:border-rose-400 dark:hover:border-rose-700/80 transition-all flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Expenses</span>
-            <span className="p-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg">
-              <TrendingDown className="w-4 h-4" />
-            </span>
+        {isAdmin && (
+          <div className="bg-gradient-to-br from-rose-50/40 to-rose-100/30 dark:from-slate-950 dark:to-rose-950/20 border border-rose-200/80 dark:border-rose-900/50 p-5 rounded-2xl shadow-sm hover:border-rose-400 dark:hover:border-rose-700/80 transition-all flex flex-col justify-between">
+            <div className="flex justify-between items-start">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Expenses</span>
+              <span className="p-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg">
+                <TrendingDown className="w-4 h-4" />
+              </span>
+            </div>
+            <h3 className="text-xl font-bold text-rose-600 dark:text-rose-400 mt-3.5">
+              GHS {dashboardStats.totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </h3>
+            <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-2 font-semibold">
+              Logged business expenses
+            </p>
           </div>
-          <h3 className="text-xl font-bold text-rose-600 dark:text-rose-400 mt-3.5">
-            GHS {dashboardStats.totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </h3>
-          <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-2 font-semibold">
-            Logged business expenses
-          </p>
-        </div>
+        )}
 
         {/* Net Profit */}
-        <div className="bg-gradient-to-br from-blue-50/40 to-blue-100/30 dark:from-slate-950 dark:to-blue-950/20 border border-blue-200/80 dark:border-blue-900/50 p-5 rounded-2xl shadow-sm hover:border-blue-400 dark:hover:border-blue-700/80 transition-all flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Net Profit</span>
-            <span className={`p-1.5 rounded-lg ${dashboardStats.netProfit >= 0 ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'}`}>
-              <TrendingUp className="w-4 h-4" />
-            </span>
+        {isAdmin && (
+          <div className="bg-gradient-to-br from-blue-50/40 to-blue-100/30 dark:from-slate-950 dark:to-blue-950/20 border border-blue-200/80 dark:border-blue-900/50 p-5 rounded-2xl shadow-sm hover:border-blue-400 dark:hover:border-blue-700/80 transition-all flex flex-col justify-between">
+            <div className="flex justify-between items-start">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Net Profit</span>
+              <span className={`p-1.5 rounded-lg ${dashboardStats.netProfit >= 0 ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'}`}>
+                <TrendingUp className="w-4 h-4" />
+              </span>
+            </div>
+            <h3 className={`text-xl font-bold mt-3.5 ${dashboardStats.netProfit >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-rose-600 dark:text-rose-400'}`}>
+              GHS {dashboardStats.netProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </h3>
+            <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-2 font-semibold">
+              Margin: {dashboardStats.totalSales > 0 ? ((dashboardStats.netProfit / dashboardStats.totalSales) * 100).toFixed(1) : '0.0'}%
+            </p>
           </div>
-          <h3 className={`text-xl font-bold mt-3.5 ${dashboardStats.netProfit >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-rose-600 dark:text-rose-400'}`}>
-            GHS {dashboardStats.netProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </h3>
-          <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-2 font-semibold">
-            Margin: {dashboardStats.totalSales > 0 ? ((dashboardStats.netProfit / dashboardStats.totalSales) * 100).toFixed(1) : '0.0'}%
-          </p>
-        </div>
+        )}
 
         {/* Outstanding Debtors */}
-        <div className="bg-gradient-to-br from-white to-indigo-50/25 dark:from-slate-950 dark:to-indigo-950/20 border border-indigo-200/80 dark:border-indigo-900/50 p-5 rounded-2xl shadow-sm hover:border-indigo-400 dark:hover:border-indigo-700/80 transition-all flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Debtors Credit</span>
-            <span className="p-1.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg">
-              <CreditCard className="w-4 h-4" />
-            </span>
+        {isAdmin && (
+          <div className="bg-gradient-to-br from-white to-indigo-50/25 dark:from-slate-950 dark:to-indigo-950/20 border border-indigo-200/80 dark:border-indigo-900/50 p-5 rounded-2xl shadow-sm hover:border-indigo-400 dark:hover:border-indigo-700/80 transition-all flex flex-col justify-between">
+            <div className="flex justify-between items-start">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Debtors Credit</span>
+              <span className="p-1.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                <CreditCard className="w-4 h-4" />
+              </span>
+            </div>
+            <h3 className="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-3.5">
+              GHS {dashboardStats.totalOutstandingCredit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </h3>
+            <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-2 font-semibold">
+              Overall outstanding shop debts
+            </p>
           </div>
-          <h3 className="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-3.5">
-            GHS {dashboardStats.totalOutstandingCredit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </h3>
-          <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-2 font-semibold">
-            Overall outstanding shop debts
-          </p>
-        </div>
+        )}
 
         {/* Low Stock count */}
         <div className="bg-gradient-to-br from-white to-amber-50/25 dark:from-slate-950 dark:to-amber-950/20 border border-amber-200/80 dark:border-amber-900/50 p-5 rounded-2xl shadow-sm hover:border-amber-400 dark:hover:border-amber-700/80 transition-all flex flex-col justify-between">
@@ -375,65 +390,67 @@ export default function AdminDashboard() {
       </div>
 
       {/* P&L and Expense Breakdown row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recharts Financial Bar Chart */}
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-2 lg:col-span-2">
-          <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">Profit & Loss visual breakdown</h3>
-          <div className="h-60 w-full pt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={financialsChartData} margin={{ left: -10, right: 10, top: 15, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.15} />
-                <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} tickFormatter={(v) => `GHS ${v}`} />
-                <Tooltip cursor={{ fill: 'rgba(16, 185, 129, 0.05)' }} contentStyle={rechartsTooltipStyle} formatter={(val) => [`GHS ${val.toLocaleString()}`, 'Value']} />
-                <Bar dataKey="Value" radius={[6, 6, 0, 0]}>
-                  {financialsChartData.map((entry, index) => {
-                    const colors = ['#10b981', '#64748b', '#f43f5e', '#3b82f6'];
-                    return <Cell key={`cell-${index}`} fill={colors[index]} />;
-                  })}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+      {isAdmin && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Recharts Financial Bar Chart */}
+          <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-2 lg:col-span-2">
+            <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">Profit & Loss visual breakdown</h3>
+            <div className="h-60 w-full pt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={financialsChartData} margin={{ left: -10, right: 10, top: 15, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.15} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} tickFormatter={(v) => `GHS ${v}`} />
+                  <Tooltip cursor={{ fill: 'rgba(16, 185, 129, 0.05)' }} contentStyle={rechartsTooltipStyle} formatter={(val) => [`GHS ${val.toLocaleString()}`, 'Value']} />
+                  <Bar dataKey="Value" radius={[6, 6, 0, 0]}>
+                    {financialsChartData.map((entry, index) => {
+                      const colors = ['#10b981', '#64748b', '#f43f5e', '#3b82f6'];
+                      return <Cell key={`cell-${index}`} fill={colors[index]} />;
+                    })}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Recharts Expenses Category Pie Chart */}
+          <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-2 flex flex-col justify-between lg:col-span-1">
+            <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200 flex items-center">
+              <PieIcon className="w-4.5 h-4.5 text-rose-500 mr-2" />
+              <span>Shop Expenses Share</span>
+            </h3>
+            {expensesPieData.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-slate-400 text-xs">
+                <span>No expenses categorized.</span>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row items-center gap-4 py-2">
+                <div className="h-40 w-40 flex-shrink-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={expensesPieData} innerRadius={45} outerRadius={60} paddingAngle={2} dataKey="value">
+                        {expensesPieData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={rechartsTooltipStyle} formatter={(val) => `GHS ${val}`} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex flex-wrap gap-x-3 gap-y-1.5 justify-start text-[10px] font-bold overflow-y-auto max-h-[140px] pr-1">
+                  {expensesPieData.map((entry, i) => (
+                    <div key={i} className="flex items-center space-x-1">
+                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
+                      <span className="text-slate-500 dark:text-slate-450 truncate max-w-[80px]">{entry.name}</span>
+                      <span className="text-slate-705 dark:text-slate-300 font-mono">({((entry.value / dashboardStats.totalExpenses) * 100).toFixed(0)}%)</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Recharts Expenses Category Pie Chart */}
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-2 flex flex-col justify-between lg:col-span-1">
-          <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200 flex items-center">
-            <PieIcon className="w-4.5 h-4.5 text-rose-500 mr-2" />
-            <span>Shop Expenses Share</span>
-          </h3>
-          {expensesPieData.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-400 text-xs">
-              <span>No expenses categorized.</span>
-            </div>
-          ) : (
-            <div className="flex flex-col sm:flex-row items-center gap-4 py-2">
-              <div className="h-40 w-40 flex-shrink-0">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={expensesPieData} innerRadius={45} outerRadius={60} paddingAngle={2} dataKey="value">
-                      {expensesPieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={rechartsTooltipStyle} formatter={(val) => `GHS ${val}`} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="flex flex-wrap gap-x-3 gap-y-1.5 justify-start text-[10px] font-bold overflow-y-auto max-h-[140px] pr-1">
-                {expensesPieData.map((entry, i) => (
-                  <div key={i} className="flex items-center space-x-1">
-                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
-                    <span className="text-slate-500 dark:text-slate-450 truncate max-w-[80px]">{entry.name}</span>
-                    <span className="text-slate-705 dark:text-slate-300 font-mono">({((entry.value / dashboardStats.totalExpenses) * 100).toFixed(0)}%)</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* Grid: Top products and Category donut */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

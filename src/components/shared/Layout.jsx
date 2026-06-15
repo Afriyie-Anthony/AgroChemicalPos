@@ -50,42 +50,47 @@ export default function Layout({ children }) {
   }, [customers]);
 
   // Sidebar Menu Categorized Configuration
-  const menuSections = [
-    {
-      title: 'MAIN',
-      items: [
-        { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { path: '/sales/pos', label: 'Sales POS', icon: ShoppingCart },
-        { path: '/admin/transactions', label: 'Transactions', icon: Receipt },
-      ]
-    },
-    {
-      title: 'INVENTORY',
-      items: [
-        { path: '/admin/products', label: 'Products', icon: PackagesIcon, badge: lowStockCount },
-        { path: '/admin/stock', label: 'Stock Control', icon: Boxes },
-        { path: '/admin/suppliers', label: 'Suppliers', icon: Truck },
-        { path: '/admin/purchase-orders', label: 'Purchase Orders', icon: ClipboardList },
-        { path: '/admin/categories', label: 'Categories', icon: Tags },
-      ]
-    },
-    {
-      title: 'BUSINESS',
-      items: [
-        { path: '/admin/customers', label: 'Customers', icon: Users },
-        { path: '/admin/credit', label: 'Credit Accounts', icon: CreditCard, badge: creditAccountCount },
-        { path: '/admin/expenses', label: 'Expenses', icon: Wallet },
-        { path: '/admin/reports', label: 'Reports', icon: BarChart3 },
-      ]
-    },
-    {
-      title: 'ADMIN',
-      items: [
-        { path: '/admin/staff', label: 'Staff & Access', icon: UserCheck },
-        { path: '/admin/settings', label: 'Settings', icon: Settings },
-      ]
-    }
-  ];
+  const menuSections = useMemo(() => {
+    const isAdmin = currentUser?.role === 'admin';
+    const sections = [
+      {
+        title: 'MAIN',
+        items: [
+          { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+          { path: '/sales/pos', label: 'Sales POS', icon: ShoppingCart },
+          { path: '/admin/transactions', label: 'Transactions', icon: Receipt },
+        ]
+      },
+      isAdmin && {
+        title: 'INVENTORY',
+        items: [
+          { path: '/admin/products', label: 'Products', icon: PackagesIcon, badge: lowStockCount },
+          { path: '/admin/stock', label: 'Stock Control', icon: Boxes },
+          { path: '/admin/suppliers', label: 'Suppliers', icon: Truck },
+          { path: '/admin/purchase-orders', label: 'Purchase Orders', icon: ClipboardList },
+          { path: '/admin/categories', label: 'Categories', icon: Tags },
+        ]
+      },
+      {
+        title: 'BUSINESS',
+        items: [
+          { path: '/admin/customers', label: 'Customers', icon: Users },
+          { path: '/admin/credit', label: 'Credit Accounts', icon: CreditCard, badge: creditAccountCount },
+          isAdmin && { path: '/admin/expenses', label: 'Expenses', icon: Wallet },
+          isAdmin && { path: '/admin/reports', label: 'Reports', icon: BarChart3 },
+        ].filter(Boolean)
+      },
+      {
+        title: 'ADMIN',
+        items: [
+          isAdmin && { path: '/admin/staff', label: 'Staff & Access', icon: UserCheck },
+          { path: '/admin/settings', label: 'Settings', icon: Settings },
+        ].filter(Boolean)
+      }
+    ].filter(Boolean);
+
+    return sections;
+  }, [currentUser, lowStockCount, creditAccountCount]);
 
   // Helper custom icon wrapper for Products category
   function PackagesIcon(props) {
@@ -119,7 +124,9 @@ export default function Layout({ children }) {
             </div>
             <div>
               <h1 className="font-bold text-sm tracking-tight text-slate-800 dark:text-white leading-none">AgroChem POS</h1>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold tracking-wide uppercase mt-1 inline-block">Admin Panel</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold tracking-wide uppercase mt-1 inline-block">
+                {currentUser?.role === 'admin' ? 'Admin Panel' : 'Sales Panel'}
+              </span>
             </div>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="p-1 text-slate-400 hover:text-slate-655 dark:text-slate-400 dark:hover:text-slate-200 md:hidden focus:outline-none">
@@ -185,11 +192,15 @@ export default function Layout({ children }) {
           >
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full bg-emerald-700/80 border border-emerald-600/30 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                KA
+                {currentUser?.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '??'}
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-800 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-450 transition-colors">Kwame Asante</p>
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate">Administrator</p>
+                <p className="text-xs font-bold text-slate-800 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-450 transition-colors">
+                  {currentUser?.name || 'Guest User'}
+                </p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate">
+                  {currentUser?.role === 'admin' ? 'Administrator' : 'Sales Associate'}
+                </p>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-350 transition-transform group-hover:translate-x-0.5" />
