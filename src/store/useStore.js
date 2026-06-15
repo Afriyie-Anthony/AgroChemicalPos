@@ -519,9 +519,14 @@ export const useStore = create((set, get) => ({
   },
 
   updateStaff: (id, updatedFields) => {
-    set(state => ({
-      staffList: state.staffList.map(s => s.id === id ? { ...s, ...updatedFields } : s)
-    }));
+    set(state => {
+      const updatedList = state.staffList.map(s => s.id === id ? { ...s, ...updatedFields } : s);
+      const isSelf = state.currentUser?.id === id;
+      return {
+        staffList: updatedList,
+        currentUser: isSelf ? { ...state.currentUser, ...updatedFields } : state.currentUser
+      };
+    });
   },
 
   // POS / CART STATE
