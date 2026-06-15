@@ -5,8 +5,24 @@ import {
   AlertTriangle,
   Clock,
   DollarSign,
-  CreditCard
+  CreditCard,
+  TrendingDown,
+  TrendingUp,
+  PieChart as PieIcon
 } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  PieChart,
+  Pie
+} from 'recharts';
 
 // Import child widgets
 import SalesTrendChart from '../../components/dashboard/admin/SalesTrendChart';
@@ -15,7 +31,7 @@ import TopProductsChart from '../../components/dashboard/admin/TopProductsChart'
 import CategoryDistributionChart from '../../components/dashboard/admin/CategoryDistributionChart';
 
 export default function AdminDashboard() {
-  const { products, customers, transactions } = useStore();
+  const { products, customers, transactions, expenses } = useStore();
   const [timeFilter, setTimeFilter] = useState('day'); // 'day', 'month', 'year'
 
   // Filter transactions dynamically based on selected timeframe

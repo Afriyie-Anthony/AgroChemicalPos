@@ -267,15 +267,13 @@ export default function Reports() {
   }, [debtorsData]);
 
   // ==========================================
-  // 5. STAFF COMMISSIONS CALCULATION
+  // 5. STAFF PERFORMANCE CALCULATION
   // ==========================================
   const staffPerformance = useMemo(() => {
     return staffList.map(staff => {
       const staffTrx = filteredTransactions.filter(t => t.cashierId === staff.id);
       const salesCount = staffTrx.length;
       const totalRevenue = staffTrx.reduce((sum, t) => sum + t.total, 0);
-      const commissionRate = staff.commissionRate || 0;
-      const commissionEarned = (totalRevenue * commissionRate) / 100;
 
       return {
         id: staff.id,
@@ -283,23 +281,16 @@ export default function Reports() {
         role: staff.role,
         phone: staff.phone,
         salesCount,
-        totalRevenue,
-        commissionRate,
-        commissionEarned
+        totalRevenue
       };
     });
   }, [staffList, filteredTransactions]);
-
-  const totalCommissionsAccrued = useMemo(() => {
-    return staffPerformance.reduce((sum, s) => sum + s.commissionEarned, 0);
-  }, [staffPerformance]);
 
   // Staff billing bar chart data
   const staffChartData = useMemo(() => {
     return staffPerformance.map(s => ({
       name: s.name,
-      Revenue: s.totalRevenue,
-      Commission: s.commissionEarned
+      Revenue: s.totalRevenue
     }));
   }, [staffPerformance]);
 
@@ -423,14 +414,12 @@ export default function Reports() {
         (c.creditLimit - c.outstandingCredit).toFixed(2)
       ]);
     } else if (activeTab === 'staff') {
-      headers = ['Staff Personnel', 'Role Profile', 'Sales Made', 'Revenue Generated (GHS)', 'Commission Rate (%)', 'Commission Payout (GHS)'];
+      headers = ['Staff Personnel', 'Role Profile', 'Sales Made', 'Revenue Generated (GHS)'];
       rows = staffPerformance.map(s => [
         s.name,
         s.role.toUpperCase(),
         s.salesCount,
-        s.totalRevenue.toFixed(2),
-        `${s.commissionRate}%`,
-        s.commissionEarned.toFixed(2)
+        s.totalRevenue.toFixed(2)
       ]);
     } else if (activeTab === 'movement') {
       headers = ['Date/Time', 'Event Descriptor', 'Product Brand/Name', 'Batch Tag', 'Stock Flow', 'Doc Code', 'Staff Operator'];
@@ -505,7 +494,7 @@ export default function Reports() {
           { id: 'financials', label: 'Financials P&L', icon: TrendingUp },
           { id: 'inventory', label: 'Inventory Assets', icon: Boxes },
           { id: 'debtors', label: 'Debtors & Credit', icon: CreditCard },
-          { id: 'staff', label: 'Staff Commission', icon: UserCheck },
+          { id: 'staff', label: 'Staff Performance', icon: UserCheck },
           { id: 'movement', label: 'Stock Flow Audit', icon: Receipt }
         ].map(tab => {
           const Icon = tab.icon;
@@ -850,7 +839,7 @@ export default function Reports() {
       )}
 
       {/* ========================================================
-          TAB 5: STAFF COMMISSIONS & SALES PERFORMANCE
+          TAB 5: STAFF SALES PERFORMANCE
           ======================================================== */}
       {activeTab === 'staff' && (
         <div className="space-y-6 animate-in fade-in duration-150">
@@ -862,9 +851,11 @@ export default function Reports() {
             </div>
             
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
-              <span className="text-[10px] text-slate-455 dark:text-slate-500 font-bold uppercase tracking-wider block">Total Commissions Accrued</span>
-              <h3 className="text-xl font-bold mt-1.5 text-emerald-500">{formatCurrency(totalCommissionsAccrued)}</h3>
-              <p className="text-[9px] text-slate-400 mt-1 font-semibold">Payout sum accrued from sales</p>
+              <span className="text-[10px] text-slate-455 dark:text-slate-500 font-bold uppercase tracking-wider block">Total Sales Completed</span>
+              <h3 className="text-xl font-bold mt-1.5 text-emerald-500">
+                {staffPerformance.reduce((sum, s) => sum + s.salesCount, 0)} checkouts
+              </h3>
+              <p className="text-[9px] text-slate-400 mt-1 font-semibold">Transactions handled in period</p>
             </div>
 
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
@@ -892,7 +883,6 @@ export default function Reports() {
                     <Tooltip contentStyle={rechartsTooltipStyle} formatter={(val) => `GHS ${val.toLocaleString()}`} />
                     <Legend wrapperStyle={{ fontSize: '10px', fontWeight: 'bold' }} />
                     <Bar dataKey="Revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="Commission" fill="#10b981" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -900,17 +890,17 @@ export default function Reports() {
 
             {/* Performance table */}
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-4 lg:col-span-1">
-              <h3 className="font-bold text-sm text-slate-805 dark:text-slate-202">Commissions Log</h3>
+              <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">Staff Sales Breakdown</h3>
               <div className="divide-y divide-slate-100 dark:divide-slate-900 overflow-y-auto max-h-[220px] pr-1">
                 {staffPerformance.map((s, idx) => (
                   <div key={idx} className="py-2.5 flex justify-between items-center text-xs">
                     <div>
-                      <p className="font-bold text-slate-755 dark:text-slate-255">{s.name}</p>
-                      <p className="text-[9px] text-slate-400 mt-0.5">Rate: {s.commissionRate}% | Sales: {s.salesCount}</p>
+                      <p className="font-bold text-slate-700 dark:text-slate-350">{s.name}</p>
+                      <p className="text-[9px] text-slate-400 mt-0.5">Role: {s.role.toUpperCase()} | Sales: {s.salesCount}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-emerald-500 font-mono">{formatCurrency(s.commissionEarned)}</p>
-                      <p className="text-[9px] text-slate-400">Total: GHS {s.totalRevenue.toFixed(0)}</p>
+                      <p className="font-bold text-blue-500 font-mono">{formatCurrency(s.totalRevenue)}</p>
+                      <p className="text-[9px] text-slate-400">Avg: {formatCurrency(s.totalRevenue / (s.salesCount || 1))}</p>
                     </div>
                   </div>
                 ))}

@@ -26,18 +26,16 @@ export default function StaffList() {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('sales');
   const [password, setPassword] = useState('');
-  const [commissionRate, setCommissionRate] = useState('2.5');
   const [status, setStatus] = useState('active');
 
-  // Commission & Sales Analytics
+  // Sales Analytics
   const staffAnalytics = useMemo(() => {
     const analytics = {};
     let totalSalesSum = 0;
-    let totalCommissionsSum = 0;
 
     // Initialize map
     staffList.forEach(s => {
-      analytics[s.id] = { totalSales: 0, commissionEarned: 0 };
+      analytics[s.id] = { totalSales: 0 };
     });
 
     // Populate from completed transactions
@@ -47,21 +45,16 @@ export default function StaffList() {
       }
     });
 
-    // Calculate commissions
+    // Sum overall sales
     staffList.forEach(s => {
       const stats = analytics[s.id] || { totalSales: 0 };
-      const rate = parseFloat(s.commissionRate) || 0;
-      stats.commissionEarned = stats.totalSales * (rate / 100);
-      
       totalSalesSum += stats.totalSales;
-      totalCommissionsSum += stats.commissionEarned;
       analytics[s.id] = stats;
     });
 
     return {
       individual: analytics,
-      totalSalesSum,
-      totalCommissionsSum
+      totalSalesSum
     };
   }, [staffList, transactions]);
 
@@ -75,7 +68,6 @@ export default function StaffList() {
       email,
       role,
       password,
-      commissionRate: parseFloat(commissionRate) || 0,
       status: 'active'
     });
     
@@ -93,7 +85,6 @@ export default function StaffList() {
       email,
       role,
       password,
-      commissionRate: parseFloat(commissionRate) || 0,
       status
     });
 
@@ -108,7 +99,6 @@ export default function StaffList() {
     setEmail(staff.email);
     setRole(staff.role);
     setPassword(staff.password);
-    setCommissionRate(String(staff.commissionRate));
     setStatus(staff.status);
   };
 
@@ -118,7 +108,6 @@ export default function StaffList() {
     setEmail('');
     setRole('sales');
     setPassword('');
-    setCommissionRate('2.5');
     setStatus('active');
   };
 
@@ -128,7 +117,7 @@ export default function StaffList() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Staff Credentials & Access</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Manage team user login roles, security passwords, and sales commission ratios</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Manage team user login roles, security passwords, and sales analytics</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
@@ -139,26 +128,21 @@ export default function StaffList() {
         </button>
       </div>
 
-      {/* Analytics widgets */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
           <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">Active Team Size</span>
           <h3 className="text-xl font-bold mt-1">{staffList.filter(s => s.status === 'active').length} Cashiers</h3>
         </div>
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
+        <div className="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
           <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">Store Sales Volume</span>
           <h3 className="text-xl font-bold mt-1 text-emerald-600 dark:text-emerald-400">GHS {staffAnalytics.totalSalesSum.toFixed(2)}</h3>
-        </div>
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
-          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">Commissions Allocated</span>
-          <h3 className="text-xl font-bold mt-1 text-blue-600 dark:text-blue-400">GHS {staffAnalytics.totalCommissionsSum.toFixed(2)}</h3>
         </div>
       </div>
 
       {/* Staff Profile Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {staffList.map(staff => {
-          const stats = staffAnalytics.individual[staff.id] || { totalSales: 0, commissionEarned: 0 };
+          const stats = staffAnalytics.individual[staff.id] || { totalSales: 0 };
 
           return (
             <div 
@@ -188,15 +172,9 @@ export default function StaffList() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 p-3 bg-slate-50/70 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-850 text-xs mt-3">
-                  <div>
-                    <span className="text-slate-400 text-[9px] font-bold uppercase block">Total Sales</span>
-                    <p className="font-bold text-slate-805 dark:text-slate-205 mt-0.5">GHS {stats.totalSales.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 text-[9px] font-bold uppercase block">Commissions ({staff.commissionRate}%)</span>
-                    <p className="font-bold text-emerald-500 mt-0.5">GHS {stats.commissionEarned.toFixed(2)}</p>
-                  </div>
+                <div className="p-3 bg-slate-50/70 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-850 text-xs mt-3">
+                  <span className="text-slate-400 text-[9px] font-bold uppercase block">Total Sales</span>
+                  <p className="font-bold text-slate-805 dark:text-slate-205 mt-0.5">GHS {stats.totalSales.toFixed(2)}</p>
                 </div>
 
                 <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-900/60 text-xs">
@@ -287,31 +265,16 @@ export default function StaffList() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">System Role</label>
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none"
-                  >
-                    <option value="sales">Sales Assistant</option>
-                    <option value="admin">Administrator</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Commission Rate (%)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="100"
-                    placeholder="2.5"
-                    value={commissionRate}
-                    onChange={(e) => setCommissionRate(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500 font-semibold"
-                  />
-                </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">System Role</label>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none"
+                >
+                  <option value="sales">Sales Assistant</option>
+                  <option value="admin">Administrator</option>
+                </select>
               </div>
 
               <div className="flex justify-end space-x-3 border-t border-slate-200 dark:border-slate-800 pt-4">
@@ -392,31 +355,16 @@ export default function StaffList() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">System Role</label>
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none"
-                  >
-                    <option value="sales">Sales Assistant</option>
-                    <option value="admin">Administrator</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Commission Rate (%)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="100"
-                    placeholder="2.5"
-                    value={commissionRate}
-                    onChange={(e) => setCommissionRate(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500 font-semibold"
-                  />
-                </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">System Role</label>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none"
+                >
+                  <option value="sales">Sales Assistant</option>
+                  <option value="admin">Administrator</option>
+                </select>
               </div>
 
               <div>

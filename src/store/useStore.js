@@ -206,8 +206,8 @@ const INITIAL_PO = [
 ];
 
 const MOCK_STAFF = [
-  { id: 'staff-1', name: 'Kwame Asante', phone: '0551234567', email: 'kwame@agrochem.com', role: 'admin', password: 'admin123', status: 'active', commissionRate: 5.0 },
-  { id: 'staff-2', name: 'Rita Asare', phone: '0547654321', email: 'rita@agrochem.com', role: 'sales', password: 'sales123', status: 'active', commissionRate: 2.5 }
+  { id: 'staff-1', name: 'Kwame Asante', phone: '0551234567', email: 'kwame@agrochem.com', role: 'admin', password: 'admin123', status: 'active' },
+  { id: 'staff-2', name: 'Rita Asare', phone: '0547654321', email: 'rita@agrochem.com', role: 'sales', password: 'sales123', status: 'active' }
 ];
 
 const INITIAL_TRX = [
