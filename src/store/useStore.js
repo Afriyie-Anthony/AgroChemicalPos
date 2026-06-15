@@ -168,9 +168,9 @@ const INITIAL_CUSTOMERS = [
 ];
 
 const INITIAL_SUPPLIERS = [
-  { id: 'sup-1', name: 'Yara Ghana Limited', contactPerson: 'Daniel Alabi', phone: '0302123456', email: 'sales.ghana@yara.com', location: 'Tema, Greater Accra', paymentTerms: '30 Days Net' },
-  { id: 'sup-2', name: 'Bayer West Africa', contactPerson: 'Evelyn Addo', phone: '0302765432', email: 'evelyn.addo@bayer.com', location: 'Accra, Greater Accra', paymentTerms: 'Cash on Delivery' },
-  { id: 'sup-3', name: 'RMG Ghana Ltd', contactPerson: 'Frank Osei', phone: '0302998877', email: 'f.osei@rmgghana.com', location: 'Tema Industrial Area', paymentTerms: '15 Days Net' }
+  { id: 'sup-1', name: 'Yara Ghana Limited', contactPerson: 'Daniel Alabi', phone: '0302123456', email: 'sales.ghana@yara.com', location: 'Tema, Greater Accra' },
+  { id: 'sup-2', name: 'Bayer West Africa', contactPerson: 'Evelyn Addo', phone: '0302765432', email: 'evelyn.addo@bayer.com', location: 'Accra, Greater Accra' },
+  { id: 'sup-3', name: 'RMG Ghana Ltd', contactPerson: 'Frank Osei', phone: '0302998877', email: 'f.osei@rmgghana.com', location: 'Tema Industrial Area' }
 ];
 
 const INITIAL_PO = [
@@ -339,6 +339,12 @@ export const useStore = create((set, get) => ({
   updateSupplier: (id, updatedFields) => {
     set(state => ({
       suppliers: state.suppliers.map(s => s.id === id ? { ...s, ...updatedFields } : s)
+    }));
+  },
+
+  deleteSupplier: (id) => {
+    set(state => ({
+      suppliers: state.suppliers.filter(s => s.id !== id)
     }));
   },
 
