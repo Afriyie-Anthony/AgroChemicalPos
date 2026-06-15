@@ -68,7 +68,6 @@ export default function PosTerminal() {
       const matchesSearch = 
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.activeIngredient.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.barcode.includes(searchQuery);
 
       const matchesCategory = activeCategory === 'All' || p.category === activeCategory;
@@ -280,7 +279,7 @@ export default function PosTerminal() {
                       <h4 className="font-bold text-xs text-slate-800 dark:text-slate-200 mt-2 line-clamp-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                         {p.name}
                       </h4>
-                      <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-1 line-clamp-1">Brand: {p.brand} | AI: {p.activeIngredient}</p>
+                      <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-1 line-clamp-1">Brand: {p.brand}</p>
                     </div>
 
                     <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-900/60 pt-2.5">

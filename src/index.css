@@ -58,20 +58,21 @@
   text-align: left;
 }
 
+/* Premium Branded Emerald Table Headers */
 .premium-table thead tr {
-  background-color: rgba(248, 250, 252, 0.8);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-  color: #64748b;
-  font-size: 10px;
+  background-color: #059669; /* Solid Emerald-600 brand color */
+  border-bottom: 2px solid #047857;
+  color: #ffffff; /* High contrast crisp white text */
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .dark .premium-table thead tr {
-  background-color: rgba(15, 23, 42, 0.4);
-  border-bottom-color: rgba(30, 41, 59, 0.4);
-  color: #94a3b8;
+  background-color: #064e3b; /* Deep rich Emerald-900 */
+  border-bottom-color: #065f46;
+  color: #ecfdf5; /* Emerald-tinted white text */
 }
 
 .premium-table th {

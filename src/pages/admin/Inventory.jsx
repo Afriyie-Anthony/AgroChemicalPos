@@ -20,8 +20,6 @@ export default function Inventory() {
     name: '',
     brand: '',
     category: 'Pesticides',
-    activeIngredient: '',
-    epaNumber: '',
     unit: 'Litre',
     costPrice: '',
     retailPrice: '',
@@ -51,8 +49,6 @@ export default function Inventory() {
       name: newProd.name,
       brand: newProd.brand,
       category: newProd.category,
-      activeIngredient: newProd.activeIngredient || 'N/A',
-      epaNumber: newProd.epaNumber || 'N/A',
       unit: newProd.unit,
       costPrice: parseFloat(newProd.costPrice) || 0,
       retailPrice: parseFloat(newProd.retailPrice) || 0,
@@ -79,8 +75,6 @@ export default function Inventory() {
       name: '',
       brand: '',
       category: 'Pesticides',
-      activeIngredient: '',
-      epaNumber: '',
       unit: 'Litre',
       costPrice: '',
       retailPrice: '',
@@ -150,7 +144,6 @@ export default function Inventory() {
                 <th className="px-6 py-4">Category / Brand</th>
                 <th className="px-6 py-4">Prices (Cost / Sell)</th>
                 <th className="px-6 py-4">Total Stock</th>
-                <th className="px-6 py-4">EPA Reg. Number</th>
                 <th className="px-6 py-4 text-center">Actions</th>
               </tr>
             </thead>
@@ -166,7 +159,6 @@ export default function Inventory() {
                       <td className="px-6 py-4">
                         <div>
                           <p className="font-bold text-slate-800 dark:text-slate-200">{p.name}</p>
-                          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5">Active Ingredient: {p.activeIngredient}</p>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -194,11 +186,6 @@ export default function Inventory() {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <span className="font-mono text-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2 py-1 rounded text-slate-500 dark:text-slate-400">
-                          {p.epaNumber}
-                        </span>
-                      </td>
                       <td className="px-6 py-4 text-center">
                         <button
                           onClick={() => {
@@ -215,7 +202,7 @@ export default function Inventory() {
 
                     {/* Batches Sub-table Row */}
                     <tr>
-                      <td colSpan="6" className="bg-slate-50/20 dark:bg-slate-950/20 px-6 py-3 border-t border-slate-100 dark:border-slate-900">
+                      <td colSpan="5" className="bg-slate-50/20 dark:bg-slate-950/20 px-6 py-3 border-t border-slate-100 dark:border-slate-900">
                         <div className="flex items-center space-x-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
                           <Layers className="w-3.5 h-3.5" />
                           <span>FEFO Batches for this Product:</span>
@@ -308,26 +295,6 @@ export default function Inventory() {
                     placeholder="e.g. Litre, 50kg Bag, Piece"
                     value={newProd.unit}
                     onChange={(e) => setNewProd({...newProd, unit: e.target.value})}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Active Ingredient</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Paraquat dichloride 200g/L"
-                    value={newProd.activeIngredient}
-                    onChange={(e) => setNewProd({...newProd, activeIngredient: e.target.value})}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">EPA Registration Number</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. EPA-HERB-2025-XXXX"
-                    value={newProd.epaNumber}
-                    onChange={(e) => setNewProd({...newProd, epaNumber: e.target.value})}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
