@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { formatCurrency, formatDateTime } from '../../utils/formatters';
-import { Receipt, Search, Eye, AlertCircle, X, ShieldAlert, Check } from 'lucide-react';
+import { Receipt, Search, Eye, AlertCircle, X, ShieldAlert, Check, Printer } from 'lucide-react';
 
 export default function TransactionsList() {
   const { transactions, voidTransaction } = useStore();
@@ -140,13 +140,13 @@ export default function TransactionsList() {
 
       {/* Modal: Receipt View & Voiding controls */}
       {activeTrx && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-white border border-slate-300 rounded-3xl overflow-hidden shadow-2xl p-6 font-mono text-[11px] text-slate-950 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-955/80 backdrop-blur-sm">
+          <div id="receipt-print-area" className="w-full max-w-sm bg-white border border-slate-300 rounded-3xl overflow-hidden shadow-2xl p-6 font-mono text-[11px] text-slate-950 animate-in fade-in zoom-in-95 duration-150">
             {/* Header */}
             <div className="text-center space-y-1 relative">
               <button 
                 onClick={() => { setActiveTrx(null); setShowVoidDialog(false); }} 
-                className="absolute -top-3 -right-3 p-1.5 rounded-full hover:bg-slate-100 text-slate-500"
+                className="absolute -top-3 -right-3 p-1.5 rounded-full hover:bg-slate-100 text-slate-500 no-print"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -198,14 +198,6 @@ export default function TransactionsList() {
 
             {/* Totals */}
             <div className="py-2.5 space-y-1 border-b border-dashed border-slate-400">
-              <div className="flex justify-between">
-                <span>Subtotal Base:</span>
-                <span>{formatCurrency(activeTrx.subtotal)}</span>
-              </div>
-              <div className="flex justify-between font-bold">
-                <span>VAT & Levies:</span>
-                <span>{formatCurrency(activeTrx.tax)}</span>
-              </div>
               <div className="flex justify-between text-xs font-bold pt-1">
                 <span>Grand Total:</span>
                 <span>{formatCurrency(activeTrx.total)}</span>
@@ -213,7 +205,7 @@ export default function TransactionsList() {
             </div>
 
             {/* Actions */}
-            <div className="pt-4 space-y-2">
+            <div className="pt-4 space-y-2 no-print">
               {activeTrx.status !== 'voided' && (
                 <>
                   {!showVoidDialog ? (
@@ -255,12 +247,21 @@ export default function TransactionsList() {
                 </>
               )}
               
-              <button
-                onClick={() => { setActiveTrx(null); setShowVoidDialog(false); }}
-                className="w-full bg-slate-900 text-white hover:bg-slate-850 font-bold py-2 rounded-xl text-xs font-mono"
-              >
-                Close Receipt
-              </button>
+              <div className="flex space-x-2 no-print">
+                <button
+                  onClick={() => window.print()}
+                  className="flex-1 bg-emerald-500 text-slate-955 hover:bg-emerald-400 font-bold py-2.5 rounded-xl text-xs flex justify-center items-center space-x-1.5 shadow"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Print</span>
+                </button>
+                <button
+                  onClick={() => { setActiveTrx(null); setShowVoidDialog(false); }}
+                  className="flex-1 bg-slate-900 text-white hover:bg-slate-850 font-bold py-2.5 rounded-xl text-xs font-mono"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>

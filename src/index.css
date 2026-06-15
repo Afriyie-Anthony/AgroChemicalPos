@@ -1,3 +1,35 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+@media print {
+  /* Hide all elements on the page */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Make only the active receipt printable area visible */
+  #receipt-print-area, #receipt-print-area * {
+    visibility: visible;
+  }
+  
+  /* Position the printable area at the absolute top-left */
+  #receipt-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 76mm; /* standard width for thermal printers */
+    margin: 0;
+    padding: 0 4px;
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  
+  /* Hide interactive elements like close and print buttons during print */
+  .no-print, .no-print * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}

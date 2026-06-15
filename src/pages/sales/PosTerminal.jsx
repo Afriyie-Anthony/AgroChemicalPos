@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { formatCurrency } from '../../utils/formatters';
-import { summarizeCartTaxes } from '../../utils/taxCalculator';
 import {
   Search,
   Trash2,
@@ -78,9 +77,14 @@ export default function PosTerminal() {
     });
   }, [products, searchQuery, activeCategory]);
 
-  // Cart Tax Summary
+  // Cart Summary (Taxes removed)
   const cartSummary = useMemo(() => {
-    return summarizeCartTaxes(cart, true);
+    const total = cart.reduce((sum, item) => sum + (item.price - item.discount) * item.quantity, 0);
+    return {
+      subtotal: total,
+      totalTax: 0,
+      total: total
+    };
   }, [cart]);
 
   // Handle add item (picks the first expired batch = FEFO)
@@ -426,15 +430,7 @@ export default function PosTerminal() {
 
         {/* Cart Totals & Checkout Trigger */}
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/60 text-xs space-y-2">
-          <div className="flex justify-between text-slate-500 dark:text-slate-400 font-semibold">
-            <span>Subtotal (Base Value)</span>
-            <span>{formatCurrency(cartSummary.subtotal)}</span>
-          </div>
-          <div className="flex justify-between text-slate-500 dark:text-slate-400 font-semibold">
-            <span>GRA Taxes (VAT + NHIL + GETF)</span>
-            <span>{formatCurrency(cartSummary.totalTax)}</span>
-          </div>
-          <div className="flex justify-between font-bold text-slate-800 dark:text-slate-100 text-sm border-t border-slate-200 dark:border-slate-800 pt-2.5">
+          <div className="flex justify-between font-bold text-slate-800 dark:text-slate-100 text-sm pt-1">
             <span>Amount Owed</span>
             <span className="text-emerald-600 dark:text-emerald-400">{formatCurrency(cartSummary.total)}</span>
           </div>
@@ -715,8 +711,8 @@ export default function PosTerminal() {
 
       {/* Modal: Thermal Receipt Print Layout */}
       {showReceiptModal && completedTransaction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 dark:bg-slate-950/80 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-white text-slate-950 border border-slate-300 rounded-3xl overflow-hidden shadow-2xl p-6 font-mono text-[11px] animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-955/80 dark:bg-slate-955/80 backdrop-blur-sm">
+          <div id="receipt-print-area" className="w-full max-w-sm bg-white text-slate-950 border border-slate-300 rounded-3xl overflow-hidden shadow-2xl p-6 font-mono text-[11px] animate-in fade-in zoom-in-95 duration-150">
             {/* Thermal Slip header */}
             <div className="text-center space-y-1">
               <span className="text-lg">🌿</span>
@@ -773,19 +769,7 @@ export default function PosTerminal() {
 
             {/* Totals */}
             <div className="py-2.5 space-y-1 border-b border-dashed border-slate-400 text-slate-900 font-medium">
-              <div className="flex justify-between">
-                <span>TIN Subtotal Base:</span>
-                <span>{formatCurrency(completedTransaction.subtotal)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>VAT (12.5% GRA):</span>
-                <span>{formatCurrency(completedTransaction.tax * (12.5/18.125))}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Levies (GETFund + NHIL):</span>
-                <span>{formatCurrency(completedTransaction.tax * (5.625/18.125))}</span>
-              </div>
-              <div className="flex justify-between text-xs font-bold pt-1 border-t border-slate-200 mt-1">
+              <div className="flex justify-between text-xs font-bold pt-1">
                 <span>Total Paid:</span>
                 <span>{formatCurrency(completedTransaction.total)}</span>
               </div>
@@ -802,16 +786,24 @@ export default function PosTerminal() {
               </p>
               <p className="border-t border-slate-300 pt-2 text-[10px] text-slate-500 font-bold">Thank you for your business!</p>
 
-              <button
-                onClick={() => {
-                  setShowReceiptModal(false);
-                  setCompletedTransaction(null);
-                }}
-                className="mt-4 w-full bg-slate-900 text-white hover:bg-slate-800 font-bold py-2 rounded-xl text-xs flex justify-center items-center space-x-1.5 shadow-md focus:outline-none"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Close / Next Sale</span>
-              </button>
+              <div className="flex space-x-2 mt-4 no-print">
+                <button
+                  onClick={() => window.print()}
+                  className="flex-1 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold py-2.5 rounded-xl text-xs flex justify-center items-center space-x-1.5 shadow-md shadow-emerald-500/10 focus:outline-none"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Print Receipt</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setShowReceiptModal(false);
+                    setCompletedTransaction(null);
+                  }}
+                  className="flex-1 bg-slate-900 text-white hover:bg-slate-800 font-bold py-2.5 rounded-xl text-xs flex justify-center items-center space-x-1.5 shadow-md focus:outline-none"
+                >
+                  <span>Next Sale</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

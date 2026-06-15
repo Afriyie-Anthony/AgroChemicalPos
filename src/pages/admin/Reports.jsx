@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
-import { calculateTaxBreakdown } from '../../utils/taxCalculator';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -81,43 +80,6 @@ export default function Reports() {
     };
   }, [filteredTransactions, products]);
 
-  // Tab 2: GRA Tax Audit Calculations
-  const taxAuditData = useMemo(() => {
-    let totalTaxCollected = 0;
-    let auditNhil = 0;
-    let auditGetFund = 0;
-    let auditVat = 0;
-    let exemptSales = 0;
-    let taxableSales = 0;
-
-    filteredTransactions.forEach(t => {
-      totalTaxCollected += t.tax;
-      
-      t.items.forEach(item => {
-        const lineTotal = (item.price - item.discount) * item.quantity;
-        if (item.taxExempt) {
-          exemptSales += lineTotal;
-        } else {
-          taxableSales += lineTotal;
-          // Split taxes using the compliant calculator
-          const breakdown = calculateTaxBreakdown(lineTotal, true);
-          auditNhil += breakdown.nhil;
-          auditGetFund += breakdown.getFund;
-          auditVat += breakdown.vat;
-        }
-      });
-    });
-
-    return {
-      totalTaxCollected,
-      nhil: auditNhil,
-      getFund: auditGetFund,
-      vat: auditVat,
-      exemptSales,
-      taxableSales
-    };
-  }, [filteredTransactions]);
-
   // Tab 3: Dynamic Stock Movement Logs
   const stockMovements = useMemo(() => {
     const movements = [];
@@ -189,7 +151,7 @@ export default function Reports() {
       </div>
 
       {/* Tabs Layout Button Group */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800">
+      <div className="flex border-b border-slate-200 dark:border-slate-880">
         <button
           onClick={() => setActiveTab('financials')}
           className={`px-5 py-3 text-xs font-bold border-b-2 transition-all ${
@@ -199,16 +161,6 @@ export default function Reports() {
           }`}
         >
           Financial Overview
-        </button>
-        <button
-          onClick={() => setActiveTab('tax')}
-          className={`px-5 py-3 text-xs font-bold border-b-2 transition-all ${
-            activeTab === 'tax'
-              ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          GRA Tax Auditor (VAT)
         </button>
         <button
           onClick={() => setActiveTab('movement')}
@@ -285,76 +237,12 @@ export default function Reports() {
               <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">Financial Reports Advisory</h3>
               <div className="space-y-3.5 text-xs text-slate-500 dark:text-slate-400">
                 <p>This report calculates **Gross Profit** based on actual unit cost prices recorded in stock batches versus final point-of-sale checkout prices. Voided transactions are automatically omitted from both sales and cost of goods sold calculations.</p>
-                <div className="flex items-start space-x-2.5 p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-850 rounded-xl">
-                  <AlertCircle className="w-4.5 h-4.5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                  <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
-                    <span className="font-bold text-slate-700 dark:text-slate-300 block mb-0.5">VAT-Inclusive Pricing Note:</span>
-                    Prices listed in checkout are recorded inclusive of all standard Ghanaian levies. The underlying revenues used for COGS comparison have VAT splits removed where applicable.
-                  </p>
-                </div>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Tab Content 2: GRA Tax Audit */}
-      {activeTab === 'tax' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
-              <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">Total Taxes Collected</span>
-              <h3 className="text-xl font-bold mt-1.5 text-emerald-600 dark:text-emerald-400">GHS {taxAuditData.totalTaxCollected.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
-              <p className="text-[9px] text-slate-400 mt-1 font-semibold">Combined NHIL, GETFund, and VAT</p>
-            </div>
-            
-            <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
-              <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">VAT (12.5%) Portion</span>
-              <h3 className="text-xl font-bold mt-1.5 text-slate-800 dark:text-slate-250">GHS {taxAuditData.vat.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
-              <p className="text-[9px] text-slate-400 mt-1 font-semibold">Calculated on (base price + levies)</p>
-            </div>
-
-            <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
-              <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">NHIL (2.5%) Portion</span>
-              <h3 className="text-xl font-bold mt-1.5 text-slate-800 dark:text-slate-250">GHS {taxAuditData.nhil.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
-              <p className="text-[9px] text-slate-400 mt-1 font-semibold">2.5% National Health Insurance Levy</p>
-            </div>
-
-            <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
-              <span className="text-[10px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider block">GETFund (2.5%) Portion</span>
-              <div className="flex items-center justify-between mt-1.5">
-                <h3 className="text-xl font-bold">GHS {taxAuditData.getFund.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
-              </div>
-              <p className="text-[9px] text-slate-400 mt-1 font-semibold">2.5% Education Trust Fund Levy</p>
-            </div>
-          </div>
-
-          {/* Taxable/Exempt split logs */}
-          <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-4">
-            <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">Exempt vs Taxable Sales Auditing</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-              <div className="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-850 flex justify-between items-center text-xs">
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Taxable Sales (Standard Rated)</span>
-                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">GHS {taxAuditData.taxableSales.toFixed(2)}</p>
-                </div>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">18.125% TAXED</span>
-              </div>
-              <div className="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-850 flex justify-between items-center text-xs">
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Zero-Rated / Exempt Sales</span>
-                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">GHS {taxAuditData.exemptSales.toFixed(2)}</p>
-                </div>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-500 dark:bg-slate-900 dark:text-slate-400">EXEMPT (Farm Tools)</span>
-              </div>
-            </div>
-            
-            <p className="text-xs text-slate-500 dark:text-slate-405 leading-relaxed pt-2">
-              **GRA Compliance**: Agro-Chemical fertilizers, seeds, and standard pesticide items attract the standard composite rate of 18.125% (cumulative VAT on levies). Farm machinery, tools (knapsacks, blades), are exempt by schedule guidelines.
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Tab Content 3: Stock Movement Log */}
       {activeTab === 'movement' && (

@@ -366,8 +366,6 @@ export default function CreditAccounts() {
                           <th className="px-4 py-3">Txn Code</th>
                           <th className="px-4 py-3">Date</th>
                           <th className="px-4 py-3">Payment Method</th>
-                          <th className="px-4 py-3 text-right">Subtotal</th>
-                          <th className="px-4 py-3 text-right">Tax (VAT)</th>
                           <th className="px-4 py-3 text-right">Total</th>
                         </tr>
                       </thead>
@@ -377,8 +375,6 @@ export default function CreditAccounts() {
                             <td className="px-4 py-3 font-mono font-bold text-[#0a6c3f] dark:text-emerald-400">{tx.transactionCode}</td>
                             <td className="px-4 py-3 text-slate-500">{new Date(tx.createdAt).toLocaleDateString('en-GB')}</td>
                             <td className="px-4 py-3 uppercase font-bold text-[10px]">{tx.paymentMethod}</td>
-                            <td className="px-4 py-3 text-right text-slate-655 dark:text-slate-400">GHS {tx.subtotal.toFixed(2)}</td>
-                            <td className="px-4 py-3 text-right text-slate-655 dark:text-slate-400">GHS {tx.tax.toFixed(2)}</td>
                             <td className="px-4 py-3 text-right font-bold">GHS {tx.total.toFixed(2)}</td>
                           </tr>
                         ))}

@@ -227,8 +227,8 @@ const INITIAL_TRX = [
     customer: { id: 'cust-1', name: 'Kofi Mensah' },
     cashierId: 'staff-2',
     cashierName: 'Rita Asare',
-    subtotal: 110.05,
-    tax: 19.95,
+    subtotal: 130.00,
+    tax: 0.00,
     total: 130.00,
     paymentMethod: 'cash',
     amountPaid: 150.00,
@@ -244,8 +244,8 @@ const INITIAL_TRX = [
     customer: null,
     cashierId: 'staff-2',
     cashierName: 'Rita Asare',
-    subtotal: 380.95,
-    tax: 69.05,
+    subtotal: 450.00,
+    tax: 0.00,
     total: 450.00,
     paymentMethod: 'momo',
     momoNetwork: 'MTN',
@@ -587,22 +587,14 @@ export const useStore = create((set, get) => ({
 
     if (cart.length === 0) return { success: false, message: 'Cart is empty' };
 
-    let totalExcludingTax = 0;
-    let totalTax = 0;
     let totalCost = 0;
 
     cart.forEach(item => {
-      const lineCostBeforeTax = (item.price - item.discount) * item.quantity;
-      if (item.taxExempt) {
-        totalExcludingTax += lineCostBeforeTax;
-        totalCost += lineCostBeforeTax;
-      } else {
-        totalCost += lineCostBeforeTax;
-        const base = lineCostBeforeTax / 1.18125;
-        totalExcludingTax += base;
-        totalTax += (lineCostBeforeTax - base);
-      }
+      totalCost += (item.price - item.discount) * item.quantity;
     });
+
+    const totalExcludingTax = totalCost;
+    const totalTax = 0;
 
     if (paymentDetails.method === 'credit') {
       if (!selectedCustomer) return { success: false, message: 'A customer must be attached for credit sales' };
