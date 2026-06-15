@@ -22,7 +22,8 @@ import {
   Sprout,
   ChevronRight,
   Bell,
-  Tags
+  Tags,
+  Wallet
 } from 'lucide-react';
 
 export default function Layout({ children }) {
@@ -73,6 +74,7 @@ export default function Layout({ children }) {
       items: [
         { path: '/admin/customers', label: 'Customers', icon: Users },
         { path: '/admin/credit', label: 'Credit Accounts', icon: CreditCard, badge: creditAccountCount },
+        { path: '/admin/expenses', label: 'Expenses', icon: Wallet },
         { path: '/admin/reports', label: 'Reports', icon: BarChart3 },
       ]
     },
@@ -133,7 +135,9 @@ export default function Layout({ children }) {
                       key={iIdx}
                       onClick={() => {
                         navigate(item.path);
-                        setSidebarOpen(false);
+                        if (window.innerWidth < 768) {
+                          setSidebarOpen(false);
+                        }
                       }}
                       className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-150 text-xs font-semibold group ${
                         isActive

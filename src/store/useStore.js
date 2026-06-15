@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 
 // Mock Initial Data for Ghana Agro-Chemical Context
+const INITIAL_EXPENSES = [
+  { id: 'exp-1', description: 'Electricity bill - June 2026', category: 'Utilities', amount: 320.00, date: '2026-06-01', paidBy: 'Kwame Asante', paymentMethod: 'bank_transfer', reference: 'ECG-JUN-2026', notes: 'Monthly electricity bill for warehouse and shop' },
+  { id: 'exp-2', description: 'Fuel for delivery truck', category: 'Transport & Logistics', amount: 450.00, date: '2026-06-05', paidBy: 'Kwame Asante', paymentMethod: 'cash', reference: '', notes: 'Fuel for Sunyani and Kumasi deliveries' },
+  { id: 'exp-3', description: 'Shop rent - June', category: 'Rent', amount: 2500.00, date: '2026-06-01', paidBy: 'Kwame Asante', paymentMethod: 'bank_transfer', reference: 'RENT-JUN-2026', notes: 'Monthly shop rent at Nsawam main road' },
+  { id: 'exp-4', description: 'Knapsack sprayer repair parts', category: 'Maintenance & Repairs', amount: 85.00, date: '2026-06-10', paidBy: 'Rita Asare', paymentMethod: 'momo', reference: 'MTN-8829371', notes: 'Spare nozzles and hoses' },
+  { id: 'exp-5', description: 'Staff lunch allowance', category: 'Staff Welfare', amount: 120.00, date: '2026-06-12', paidBy: 'Kwame Asante', paymentMethod: 'cash', reference: '', notes: 'Weekly lunch allowance for 3 staff' },
+];
 const INITIAL_PRODUCTS = [
   {
     id: 'prod-1',
@@ -272,6 +279,8 @@ export const useStore = create((set, get) => ({
   purchaseOrders: INITIAL_PO,
   adjustments: [],
   categories: ['Pesticides', 'Herbicides', 'Fertilizers', 'Seeds', 'Farm Tools & Equipment', 'Organic & Bio Inputs'],
+  expenses: INITIAL_EXPENSES,
+  expenseCategories: ['Utilities', 'Transport & Logistics', 'Rent', 'Maintenance & Repairs', 'Staff Welfare', 'Marketing & Advertising', 'Office Supplies', 'Insurance', 'Taxes & Levies', 'Miscellaneous'],
 
   addProduct: (product) => {
     const newProduct = {
@@ -373,6 +382,28 @@ export const useStore = create((set, get) => ({
   deleteCategory: (name) => {
     set(state => ({
       categories: state.categories.filter(cat => cat !== name)
+    }));
+  },
+
+  // EXPENSE MANAGEMENT ACTIONS
+  addExpense: (expense) => {
+    const newExpense = {
+      ...expense,
+      id: `exp-${Date.now()}`
+    };
+    set(state => ({ expenses: [newExpense, ...state.expenses] }));
+    return newExpense;
+  },
+
+  updateExpense: (id, updatedFields) => {
+    set(state => ({
+      expenses: state.expenses.map(e => e.id === id ? { ...e, ...updatedFields } : e)
+    }));
+  },
+
+  deleteExpense: (id) => {
+    set(state => ({
+      expenses: state.expenses.filter(e => e.id !== id)
     }));
   },
 
