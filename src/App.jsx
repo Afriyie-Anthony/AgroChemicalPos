@@ -21,6 +21,7 @@ import CreditAccounts from './pages/admin/CreditAccounts';
 import Reports from './pages/admin/Reports';
 import StaffList from './pages/admin/StaffList';
 import Settings from './pages/admin/Settings';
+import Categories from './pages/admin/Categories';
 
 // Simple Route Guard for Auth and Role checks
 function ProtectedRoute({ children, requiredRole }) {
@@ -88,6 +89,14 @@ function App() {
           element={
             <ProtectedRoute requiredRole="admin">
               <Suppliers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/categories"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <Categories />
             </ProtectedRoute>
           }
         />

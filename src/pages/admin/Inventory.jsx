@@ -4,7 +4,7 @@ import { formatCurrency, formatDate } from '../../utils/formatters';
 import { Plus, X, AlertTriangle, FileSpreadsheet, Package, Layers, Info } from 'lucide-react';
 
 export default function Inventory() {
-  const { products, addProduct, adjustStock } = useStore();
+  const { products, addProduct, adjustStock, categories } = useStore();
   const [selectedCategory, setSelectedCategory] = useState('All');
   
   // Modals/Drawers toggle state
@@ -21,7 +21,7 @@ export default function Inventory() {
   const [newProd, setNewProd] = useState({
     name: '',
     brand: '',
-    category: 'Pesticides',
+    category: categories[0] || 'Pesticides',
     unit: 'Litre',
     costPrice: '',
     retailPrice: '',
@@ -33,7 +33,7 @@ export default function Inventory() {
     expiryDate: ''
   });
 
-  const categories = ['All', 'Pesticides', 'Herbicides', 'Fertilizers', 'Seeds', 'Farm Tools & Equipment', 'Organic & Bio Inputs'];
+  const categoriesList = useMemo(() => ['All', ...categories], [categories]);
 
   const filteredProducts = useMemo(() => {
     if (selectedCategory === 'All') return products;
@@ -76,7 +76,7 @@ export default function Inventory() {
     setNewProd({
       name: '',
       brand: '',
-      category: 'Pesticides',
+      category: categories[0] || 'Pesticides',
       unit: 'Litre',
       costPrice: '',
       retailPrice: '',
@@ -121,7 +121,7 @@ export default function Inventory() {
 
       {/* Category Pills Slider */}
       <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800 scrollbar-track-transparent">
-        {categories.map((cat) => (
+        {categoriesList.map((cat) => (
           <button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
@@ -259,7 +259,7 @@ export default function Inventory() {
                     onChange={(e) => setNewProd({...newProd, category: e.target.value})}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
                   >
-                    {categories.slice(1).map(c => <option key={c} value={c}>{c}</option>)}
+                    {categories.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>

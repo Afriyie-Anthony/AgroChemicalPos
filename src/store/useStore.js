@@ -271,6 +271,7 @@ export const useStore = create((set, get) => ({
   suppliers: INITIAL_SUPPLIERS,
   purchaseOrders: INITIAL_PO,
   adjustments: [],
+  categories: ['Pesticides', 'Herbicides', 'Fertilizers', 'Seeds', 'Farm Tools & Equipment', 'Organic & Bio Inputs'],
 
   addProduct: (product) => {
     const newProduct = {
@@ -345,6 +346,33 @@ export const useStore = create((set, get) => ({
   deleteSupplier: (id) => {
     set(state => ({
       suppliers: state.suppliers.filter(s => s.id !== id)
+    }));
+  },
+
+  // CATEGORY MANAGEMENT ACTIONS
+  addCategory: (name) => {
+    set(state => {
+      if (state.categories.includes(name)) return {};
+      return { categories: [...state.categories, name] };
+    });
+  },
+
+  updateCategory: (oldName, newName) => {
+    set(state => {
+      const updatedCategories = state.categories.map(cat => cat === oldName ? newName : cat);
+      const updatedProducts = state.products.map(prod => 
+        prod.category === oldName ? { ...prod, category: newName } : prod
+      );
+      return {
+        categories: updatedCategories,
+        products: updatedProducts
+      };
+    });
+  },
+
+  deleteCategory: (name) => {
+    set(state => ({
+      categories: state.categories.filter(cat => cat !== name)
     }));
   },
 

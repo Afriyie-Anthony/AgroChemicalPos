@@ -33,7 +33,8 @@ export default function PosTerminal() {
     holdCart,
     resumeCart,
     addCustomer,
-    checkout
+    checkout,
+    categories
   } = useStore();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,7 +61,7 @@ export default function PosTerminal() {
   const [splitAmounts, setSplitAmounts] = useState({ cash: 0, momo: 0 });
   const [checkoutError, setCheckoutError] = useState('');
 
-  const categories = ['All', 'Pesticides', 'Herbicides', 'Fertilizers', 'Seeds', 'Farm Tools & Equipment'];
+  const categoriesList = useMemo(() => ['All', ...categories], [categories]);
 
   // Smart search and category filtering
   const filteredProducts = useMemo(() => {
@@ -229,7 +230,7 @@ export default function PosTerminal() {
 
         {/* Category Browsing Tabs */}
         <div className="flex space-x-1.5 overflow-x-auto pb-3 mb-4 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
-          {categories.map(cat => (
+          {categoriesList.map(cat => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}

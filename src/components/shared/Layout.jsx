@@ -21,7 +21,8 @@ import {
   X,
   Sprout,
   ChevronRight,
-  Bell
+  Bell,
+  Tags
 } from 'lucide-react';
 
 export default function Layout({ children }) {
@@ -64,6 +65,7 @@ export default function Layout({ children }) {
         { path: '/admin/stock', label: 'Stock Control', icon: Boxes },
         { path: '/admin/suppliers', label: 'Suppliers', icon: Truck },
         { path: '/admin/purchase-orders', label: 'Purchase Orders', icon: ClipboardList },
+        { path: '/admin/categories', label: 'Categories', icon: Tags },
       ]
     },
     {
