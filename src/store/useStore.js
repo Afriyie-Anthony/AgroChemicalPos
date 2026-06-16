@@ -273,6 +273,10 @@ export const useStore = create((set, get) => ({
     set({ currentUser: null, isAuthenticated: false });
   },
 
+  // API-driven auth helpers
+  setCurrentUser: (user) => set({ currentUser: user, isAuthenticated: true }),
+  clearCurrentUser: () => set({ currentUser: null, isAuthenticated: false }),
+
   // INVENTORY STATE
   products: INITIAL_PRODUCTS,
   suppliers: INITIAL_SUPPLIERS,
