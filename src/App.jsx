@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useStore } from './store/useStore';
+import { useInitAuth } from './hooks/useAuth';
 
 // Components
 import Layout from './components/shared/Layout';
@@ -45,6 +46,7 @@ function ProtectedRoute({ children, requiredRole }) {
 
 function App() {
   const { theme } = useStore();
+  const { isInitializing } = useInitAuth(); // Rehydrates user from token on page refresh
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -53,6 +55,18 @@ function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [theme]);
+
+  // Prevent routing until auth state is known
+  if (isInitializing) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+        <p className="mt-4 text-xs font-bold text-slate-500 uppercase tracking-widest animate-pulse">
+          Loading Workspace...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <Router>

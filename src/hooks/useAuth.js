@@ -1,4 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authService } from '../api/services/authService';
 import { useStore } from '../store/useStore';
 
@@ -29,6 +30,16 @@ export const useChangePassword = () => {
   });
 };
 
+export const useUpdateProfile = () => {
+  const { setCurrentUser } = useStore();
+  return useMutation({
+    mutationFn: authService.updateProfile,
+    onSuccess: (data) => {
+      setCurrentUser(data.user);
+    },
+  });
+};
+
 export const useLogout = () => {
   const { clearCurrentUser } = useStore();
   const queryClient = useQueryClient();
@@ -38,4 +49,32 @@ export const useLogout = () => {
     clearCurrentUser();
     queryClient.clear();
   };
+};
+
+
+// Rehydrates auth state from token on page refresh
+export const useInitAuth = () => {
+  const { setCurrentUser, isAuthenticated } = useStore();
+  const token = localStorage.getItem('agrochem_token');
+
+  const query = useQuery({
+    queryKey: ['auth', 'me'],
+    queryFn: () => authService.getMe().then((r) => r.user),
+    enabled: !!token && !isAuthenticated,
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (query.isSuccess && query.data) {
+      setCurrentUser(query.data);
+    } else if (query.isError) {
+      // Token is invalid/expired — clear it
+      localStorage.removeItem('agrochem_token');
+    }
+  }, [query.isSuccess, query.isError, query.data, setCurrentUser]);
+
+  // We are initializing if we have a token, we aren't authenticated yet, and the query hasn't failed
+  const isInitializing = !!token && !isAuthenticated && !query.isError;
+
+  return { isInitializing };
 };
