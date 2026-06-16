@@ -4,6 +4,39 @@ import { useSettings, useUpdateSettings } from '../../hooks/useSettings';
 import { useUpdateProfile, useChangePassword } from '../../hooks/useAuth';
 import { Store, Save, CheckCircle, User, Lock, Loader2, AlertCircle } from 'lucide-react';
 
+const Alert = ({ type, message }) => (
+  <div className={`p-3 rounded-xl flex items-center space-x-2 text-xs font-semibold animate-in slide-in-from-top duration-200 ${
+    type === 'success'
+      ? 'bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+      : 'bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400'
+  }`}>
+    {type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+    <span>{message}</span>
+  </div>
+);
+
+const Card = ({ icon: Icon, title, children, onSubmit, isPending, saveLabel = 'Save Changes', success, error }) => (
+  <form onSubmit={onSubmit} className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-5">
+    <div className="flex items-center space-x-2 pb-3 border-b border-slate-100 dark:border-slate-900">
+      <Icon className="w-5 h-5 text-emerald-500" />
+      <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">{title}</h3>
+    </div>
+    <div className="space-y-4 text-xs">{children}</div>
+    {success && <Alert type="success" message={success} />}
+    {error   && <Alert type="error"   message={error} />}
+    <div className="flex justify-end pt-1">
+      <button
+        type="submit"
+        disabled={isPending}
+        className="flex items-center space-x-1.5 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-wait"
+      >
+        {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+        <span>{saveLabel}</span>
+      </button>
+    </div>
+  </form>
+);
+
 export default function Settings() {
   const { currentUser, setCurrentUser } = useStore();
   const isAdmin = currentUser?.role === 'admin';
@@ -106,38 +139,6 @@ export default function Settings() {
   const inputCls = 'w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors';
   const labelCls = 'block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5';
 
-  const Alert = ({ type, message }) => (
-    <div className={`p-3 rounded-xl flex items-center space-x-2 text-xs font-semibold animate-in slide-in-from-top duration-200 ${
-      type === 'success'
-        ? 'bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-        : 'bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400'
-    }`}>
-      {type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-      <span>{message}</span>
-    </div>
-  );
-
-  const Card = ({ icon: Icon, title, children, onSubmit, isPending, saveLabel = 'Save Changes', success, error }) => (
-    <form onSubmit={onSubmit} className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-6 rounded-2xl shadow-sm space-y-5">
-      <div className="flex items-center space-x-2 pb-3 border-b border-slate-100 dark:border-slate-900">
-        <Icon className="w-5 h-5 text-emerald-500" />
-        <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">{title}</h3>
-      </div>
-      <div className="space-y-4 text-xs">{children}</div>
-      {success && <Alert type="success" message={success} />}
-      {error   && <Alert type="error"   message={error} />}
-      <div className="flex justify-end pt-1">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="flex items-center space-x-1.5 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-wait"
-        >
-          {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-          <span>{saveLabel}</span>
-        </button>
-      </div>
-    </form>
-  );
 
   return (
     <div className="space-y-6 text-slate-800 dark:text-slate-100 font-sans max-w-5xl">
@@ -148,7 +149,7 @@ export default function Settings() {
         </p>
       </div>
 
-      <div className={`grid grid-cols-1 ${isAdmin ? 'lg:grid-cols-2' : 'max-w-2xl'} gap-6`}>
+      <div className={`grid grid-cols-1 items-start ${isAdmin ? 'lg:grid-cols-2' : 'max-w-2xl'} gap-6`}>
 
         {/* ── Business Settings (Admin only) ── */}
         {isAdmin && (

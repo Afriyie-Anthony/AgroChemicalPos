@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import { useLogout } from '../../hooks/useAuth';
+import { useSettings } from '../../hooks/useSettings';
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -32,6 +33,7 @@ export default function Layout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const logout = useLogout();
+  const { data: bizData } = useSettings();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
 
   const handleLogout = () => {
@@ -125,7 +127,7 @@ export default function Layout({ children }) {
               <Sprout className="w-5.5 h-5.5 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-sm tracking-tight text-slate-800 dark:text-white leading-none">AgroChem POS</h1>
+              <h1 className="font-bold text-sm tracking-tight text-slate-800 dark:text-white leading-none">{bizData?.shopName || 'AgroChem POS'}</h1>
               <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold tracking-wide uppercase mt-1 inline-block">
                 {currentUser?.role === 'admin' ? 'Admin Panel' : 'Sales Panel'}
               </span>
@@ -227,8 +229,8 @@ export default function Layout({ children }) {
             <div className="hidden sm:flex items-center space-x-2">
               <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <div>
-                <h2 className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-none">Nsawam Main Store</h2>
-                <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500">Eastern Region, Ghana</span>
+                <h2 className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-none">{bizData?.shopName || 'Nsawam Main Store'}</h2>
+                <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500">{bizData?.gpsAddress || 'Eastern Region, Ghana'}</span>
               </div>
             </div>
           </div>
