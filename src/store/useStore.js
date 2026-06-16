@@ -256,6 +256,11 @@ export const useStore = create((set, get) => ({
   staffList: MOCK_STAFF,
   theme: 'light', // 'light' or 'dark'
 
+  // CUSTOM ALERT STATE
+  alertConfig: { isOpen: false, message: '', type: 'info', title: '', onConfirm: null },
+  showAlert: (message, type = 'info', title = 'Notice', onConfirm = null) => set({ alertConfig: { isOpen: true, message, type, title, onConfirm } }),
+  closeAlert: () => set(state => ({ alertConfig: { ...state.alertConfig, isOpen: false } })),
+
   toggleTheme: () => set(state => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
 
   login: (email, password) => {

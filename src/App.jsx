@@ -5,6 +5,7 @@ import { useInitAuth } from './hooks/useAuth';
 
 // Components
 import Layout from './components/shared/Layout';
+import AlertModal from './components/shared/AlertModal';
 
 // Pages
 import Login from './pages/auth/Login';
@@ -70,6 +71,7 @@ function App() {
 
   return (
     <Router>
+      <AlertModal />
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />

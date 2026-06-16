@@ -1,8 +1,23 @@
 import apiClient from '../apiClient';
 
 export const categoryService = {
-  getAll: () => apiClient.get('/categories').then((r) => r.data),
-  create: (data) => apiClient.post('/categories', data).then((r) => r.data),
-  update: (id, data) => apiClient.put(`/categories/${id}`, data).then((r) => r.data),
-  remove: (id) => apiClient.delete(`/categories/${id}`).then((r) => r.data),
+  getAll: async () => {
+    const response = await apiClient.get('/categories');
+    return response.data;
+  },
+
+  create: async (data) => {
+    const response = await apiClient.post('/categories', data);
+    return response.data;
+  },
+
+  update: async ({ id, data }) => {
+    const response = await apiClient.put(`/categories/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id) => {
+    const response = await apiClient.delete(`/categories/${id}`);
+    return response.data;
+  },
 };

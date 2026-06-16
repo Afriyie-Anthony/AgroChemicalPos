@@ -1,9 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useCategoryList, useCreateCategory, useUpdateCategory, useDeleteCategory } from '../../hooks/useCategory';
 import { Tags, Plus, X, Edit, Trash2, AlertTriangle, Layers } from 'lucide-react';
 
 export default function Categories() {
-  const { categories, products, addCategory, updateCategory, deleteCategory } = useStore();
+  const { products, showAlert } = useStore();
+  const { data: categories = [] } = useCategoryList();
+  const { mutate: createCategoryApi, isPending: isCreating } = useCreateCategory();
+  const { mutate: updateCategoryApi, isPending: isUpdating } = useUpdateCategory();
+  const { mutate: deleteCategoryApi, isPending: isDeleting } = useDeleteCategory();
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeCategoryToEdit, setActiveCategoryToEdit] = useState(null);
   const [name, setName] = useState('');
@@ -11,8 +16,8 @@ export default function Categories() {
   // Count products associated with each category
   const categoryStats = useMemo(() => {
     return categories.map(cat => {
-      const count = products.filter(p => p.category === cat).length;
-      return { name: cat, count };
+      const count = products.filter(p => p.category === cat.name).length;
+      return { id: cat.id, name: cat.name, count };
     });
   }, [categories, products]);
 
@@ -21,14 +26,17 @@ export default function Categories() {
     const trimmed = name.trim();
     if (!trimmed) return;
 
-    if (categories.includes(trimmed)) {
-      alert('This category name already exists.');
+    if (categories.some(c => c.name.toLowerCase() === trimmed.toLowerCase())) {
+      showAlert('This category name already exists.', 'warning', 'Duplicate Category');
       return;
     }
 
-    addCategory(trimmed);
-    setShowAddModal(false);
-    setName('');
+    createCategoryApi({ name: trimmed }, {
+      onSuccess: () => {
+        setShowAddModal(false);
+        setName('');
+      }
+    });
   };
 
   const handleEditSubmit = (e) => {
@@ -36,36 +44,42 @@ export default function Categories() {
     const trimmed = name.trim();
     if (!trimmed || !activeCategoryToEdit) return;
 
-    if (trimmed === activeCategoryToEdit) {
+    if (trimmed === activeCategoryToEdit.name) {
       setActiveCategoryToEdit(null);
       setName('');
       return;
     }
 
-    if (categories.includes(trimmed)) {
-      alert('This category name already exists.');
+    if (categories.some(c => c.name.toLowerCase() === trimmed.toLowerCase() && c.id !== activeCategoryToEdit.id)) {
+      showAlert('This category name already exists.', 'warning', 'Duplicate Category');
       return;
     }
 
-    updateCategory(activeCategoryToEdit, trimmed);
-    setActiveCategoryToEdit(null);
-    setName('');
+    updateCategoryApi({ id: activeCategoryToEdit.id, data: { name: trimmed } }, {
+      onSuccess: () => {
+        setActiveCategoryToEdit(null);
+        setName('');
+      }
+    });
   };
 
   const openEditModal = (cat) => {
     setActiveCategoryToEdit(cat);
-    setName(cat);
+    setName(cat.name);
   };
 
-  const handleDelete = (catName, count) => {
+  const handleDelete = (cat, count) => {
     if (count > 0) {
-      alert(`Cannot delete category "${catName}" because it contains ${count} associated products. Please reassign the products to another category before deleting this one.`);
+      showAlert(`Cannot delete category "${cat.name}" because it contains ${count} associated products. Please reassign the products to another category before deleting this one.`, 'error', 'Action Denied');
       return;
     }
 
-    if (window.confirm(`Are you sure you want to delete the category "${catName}"?`)) {
-      deleteCategory(catName);
-    }
+    showAlert(
+      `Are you sure you want to delete the category "${cat.name}"? This action cannot be undone.`,
+      'error',
+      'Confirm Deletion',
+      () => deleteCategoryApi(cat.id)
+    );
   };
 
   return (
@@ -101,7 +115,7 @@ export default function Categories() {
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {categoryStats.map(stat => (
-                <tr key={stat.name} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors text-xs">
+                <tr key={stat.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors text-xs">
                   <td className="px-6 py-4 font-bold text-slate-800 dark:text-slate-200 flex items-center space-x-2">
                     <Layers className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                     <span>{stat.name}</span>
@@ -118,14 +132,15 @@ export default function Categories() {
                   <td className="px-6 py-4 text-center">
                     <div className="flex items-center justify-center space-x-2">
                       <button
-                        onClick={() => openEditModal(stat.name)}
+                        onClick={() => openEditModal(stat)}
                         className="p-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         title="Rename Category"
                       >
                         <Edit className="w-3.5 h-3.5" />
                       </button>
                       <button
-                        onClick={() => handleDelete(stat.name, stat.count)}
+                        onClick={() => handleDelete(stat, stat.count)}
+                        disabled={isDeleting}
                         className={`p-1.5 border rounded-lg transition-colors ${
                           stat.count > 0 
                             ? 'bg-slate-100 dark:bg-slate-950 text-slate-350 dark:text-slate-650 border-slate-200 dark:border-slate-850 cursor-not-allowed'
@@ -186,9 +201,11 @@ export default function Categories() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-500 text-slate-955 hover:bg-emerald-400 font-bold rounded-xl shadow-sm"
+                  disabled={isCreating}
+                  className="px-4 py-2 bg-emerald-500 text-slate-955 hover:bg-emerald-400 font-bold rounded-xl shadow-sm disabled:opacity-60 flex items-center space-x-2"
                 >
-                  Create
+                  {isCreating ? <span className="animate-spin w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full"></span> : null}
+                  <span>Create</span>
                 </button>
               </div>
             </form>
@@ -228,7 +245,7 @@ export default function Categories() {
               <div className="flex items-center space-x-2 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 p-3.5 rounded-xl">
                 <AlertTriangle className="w-5 h-5 flex-shrink-0" />
                 <p className="text-[10px] font-medium leading-relaxed">
-                  <strong>Warning:</strong> Renaming this category will perform a cascading update on all products currently assigned to "{activeCategoryToEdit}".
+                  <strong>Warning:</strong> Renaming this category will perform a cascading update on all products currently assigned to "{activeCategoryToEdit.name}".
                 </p>
               </div>
 
@@ -245,9 +262,11 @@ export default function Categories() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-500 text-slate-955 hover:bg-emerald-400 font-bold rounded-xl shadow-sm"
+                  disabled={isUpdating}
+                  className="px-4 py-2 bg-emerald-500 text-slate-955 hover:bg-emerald-400 font-bold rounded-xl shadow-sm disabled:opacity-60 flex items-center space-x-2"
                 >
-                  Rename
+                  {isUpdating ? <span className="animate-spin w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full"></span> : null}
+                  <span>Rename</span>
                 </button>
               </div>
             </form>
