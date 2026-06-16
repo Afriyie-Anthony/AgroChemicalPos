@@ -1,9 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useSupplierList, useCreateSupplier, useUpdateSupplier, useDeleteSupplier } from '../../hooks/useSupplier';
 import { Truck, Plus, Mail, Phone, MapPin, X, LayoutGrid, List, Info, Trash2 } from 'lucide-react';
 
 export default function Suppliers() {
-  const { suppliers, addSupplier, updateSupplier, deleteSupplier, purchaseOrders, products } = useStore();
+  const { purchaseOrders, products, showAlert } = useStore();
+  const { data: suppliers = [], isLoading } = useSupplierList();
+  const { mutate: createSupplierApi, isPending: isCreating } = useCreateSupplier();
+  const { mutate: updateSupplierApi, isPending: isUpdating } = useUpdateSupplier();
+  const { mutate: deleteSupplierApi, isPending: isDeleting } = useDeleteSupplier();
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeSupplier, setActiveSupplier] = useState(null);
   const [viewMode, setViewMode] = useState('card'); // 'card' or 'table'
@@ -57,35 +62,35 @@ export default function Suppliers() {
     e.preventDefault();
     if (!name || !phone) return;
 
-    addSupplier({ name, contactPerson, phone, email, location });
-    setShowAddModal(false);
-    
-    // Clear inputs
-    setName('');
-    setContactPerson('');
-    setPhone('');
-    setEmail('');
-    setLocation('');
+    createSupplierApi({ name, contactPerson, phone, email, location }, {
+      onSuccess: () => {
+        setShowAddModal(false);
+        setName('');
+        setContactPerson('');
+        setPhone('');
+        setEmail('');
+        setLocation('');
+      }
+    });
   };
 
   const handleEditSubmit = (e) => {
     e.preventDefault();
     if (!activeSupplier) return;
 
-    updateSupplier(activeSupplier.id, {
-      name,
-      contactPerson,
-      phone,
-      email,
-      location
+    updateSupplierApi({
+      id: activeSupplier.id,
+      data: { name, contactPerson, phone, email, location }
+    }, {
+      onSuccess: () => {
+        setActiveSupplier(null);
+        setName('');
+        setContactPerson('');
+        setPhone('');
+        setEmail('');
+        setLocation('');
+      }
     });
-    
-    setActiveSupplier(null);
-    setName('');
-    setContactPerson('');
-    setPhone('');
-    setEmail('');
-    setLocation('');
   };
 
   const openEditModal = (sup) => {
@@ -98,9 +103,12 @@ export default function Suppliers() {
   };
 
   const handleDeleteSupplier = (sup) => {
-    if (window.confirm(`Are you sure you want to delete supplier "${sup.name}"?`)) {
-      deleteSupplier(sup.id);
-    }
+    showAlert(
+      `Are you sure you want to delete supplier "${sup.name}"? This action cannot be undone.`,
+      'error',
+      'Confirm Deletion',
+      () => deleteSupplierApi(sup.id)
+    );
   };
 
   return (
@@ -140,7 +148,12 @@ export default function Suppliers() {
       </div>
 
       {/* Supplier List Render */}
-      {viewMode === 'card' ? (
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
+          <p className="mt-4 text-slate-500 font-medium">Loading Suppliers...</p>
+        </div>
+      ) : viewMode === 'card' ? (
         /* Supplier Grid list */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {suppliers.map(sup => (
@@ -189,14 +202,15 @@ export default function Suppliers() {
                 >
                   <span>Edit</span>
                 </button>
-                <button
-                  onClick={() => handleDeleteSupplier(sup)}
-                  className="py-2 flex items-center justify-center space-x-1 bg-rose-500/10 hover:bg-rose-500/20 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 border border-rose-500/20 dark:border-rose-500/30 text-[10px] font-bold rounded-lg text-rose-600 dark:text-rose-400 transition-colors shadow-sm focus:outline-none"
-                  title="Delete Supplier"
-                >
-                  <Trash2 className="w-3.5 h-3.5 text-rose-500" />
-                  <span>Delete</span>
-                </button>
+                  <button
+                    onClick={() => handleDeleteSupplier(sup)}
+                    disabled={isDeleting}
+                    className="py-2 flex items-center justify-center space-x-1 bg-rose-500/10 hover:bg-rose-500/20 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 border border-rose-500/20 dark:border-rose-500/30 text-[10px] font-bold rounded-lg text-rose-600 dark:text-rose-400 transition-colors shadow-sm focus:outline-none disabled:opacity-50"
+                    title="Delete Supplier"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                    <span>Delete</span>
+                  </button>
               </div>
             </div>
           ))}
@@ -245,7 +259,8 @@ export default function Suppliers() {
                         </button>
                         <button
                           onClick={() => handleDeleteSupplier(sup)}
-                          className="px-2 py-1 bg-rose-500/10 hover:bg-rose-500/20 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 border border-rose-500/20 dark:border-rose-500/30 text-[10px] font-bold rounded-lg text-rose-600 dark:text-rose-400 transition-colors shadow-sm flex items-center space-x-1"
+                          disabled={isDeleting}
+                          className="px-2 py-1 bg-rose-500/10 hover:bg-rose-500/20 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 border border-rose-500/20 dark:border-rose-500/30 text-[10px] font-bold rounded-lg text-rose-600 dark:text-rose-400 transition-colors shadow-sm flex items-center space-x-1 disabled:opacity-50"
                         >
                           <Trash2 className="w-3.5 h-3.5 text-rose-500" />
                           <span>Delete</span>
@@ -337,9 +352,11 @@ export default function Suppliers() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold rounded-xl"
+                  disabled={isCreating}
+                  className="px-4 py-2 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold rounded-xl flex items-center space-x-2 disabled:opacity-60"
                 >
-                  Save Supplier
+                  {isCreating && <div className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>}
+                  <span>Save Supplier</span>
                 </button>
               </div>
             </form>
@@ -424,9 +441,11 @@ export default function Suppliers() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold rounded-xl shadow-sm"
+                  disabled={isUpdating}
+                  className="px-4 py-2 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold rounded-xl shadow-sm flex items-center space-x-2 disabled:opacity-60"
                 >
-                  Save Changes
+                  {isUpdating && <div className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>}
+                  <span>Save Changes</span>
                 </button>
               </div>
             </form>

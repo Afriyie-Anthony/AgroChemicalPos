@@ -1,8 +1,23 @@
 import apiClient from '../apiClient';
 
 export const supplierService = {
-  getAll: () => apiClient.get('/suppliers').then((r) => r.data),
-  create: (data) => apiClient.post('/suppliers', data).then((r) => r.data),
-  update: (id, data) => apiClient.put(`/suppliers/${id}`, data).then((r) => r.data),
-  remove: (id) => apiClient.delete(`/suppliers/${id}`).then((r) => r.data),
+  getAll: async () => {
+    const response = await apiClient.get('/suppliers');
+    return response.data;
+  },
+
+  create: async (data) => {
+    const response = await apiClient.post('/suppliers', data);
+    return response.data;
+  },
+
+  update: async ({ id, data }) => {
+    const response = await apiClient.put(`/suppliers/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id) => {
+    const response = await apiClient.delete(`/suppliers/${id}`);
+    return response.data;
+  },
 };
