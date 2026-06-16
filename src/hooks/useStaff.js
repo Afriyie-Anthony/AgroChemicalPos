@@ -1,12 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { staffService } from '../api/services/staffService';
 
-const STAFF_KEY = ['staff'];
-
-export const useStaff = () => {
+export const useStaffList = () => {
   return useQuery({
-    queryKey: STAFF_KEY,
-    queryFn: () => staffService.getAll().then((r) => r.data),
+    queryKey: ['staff'],
+    queryFn: () => staffService.getAll().then((res) => res.data),
   });
 };
 
@@ -14,22 +12,28 @@ export const useCreateStaff = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: staffService.create,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: STAFF_KEY }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['staff'] });
+    },
   });
 };
 
 export const useUpdateStaff = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }) => staffService.update(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: STAFF_KEY }),
+    mutationFn: staffService.update,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['staff'] });
+    },
   });
 };
 
 export const useDeactivateStaff = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id) => staffService.deactivate(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: STAFF_KEY }),
+    mutationFn: staffService.deactivate,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['staff'] });
+    },
   });
 };

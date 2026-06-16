@@ -1,8 +1,23 @@
 import apiClient from '../apiClient';
 
 export const staffService = {
-  getAll: () => apiClient.get('/staff').then((r) => r.data),
-  create: (data) => apiClient.post('/staff', data).then((r) => r.data),
-  update: (id, data) => apiClient.put(`/staff/${id}`, data).then((r) => r.data),
-  deactivate: (id) => apiClient.delete(`/staff/${id}`).then((r) => r.data),
+  getAll: async () => {
+    const response = await apiClient.get('/staff');
+    return response.data;
+  },
+
+  create: async (staffData) => {
+    const response = await apiClient.post('/staff', staffData);
+    return response.data;
+  },
+
+  update: async ({ id, data }) => {
+    const response = await apiClient.put(`/staff/${id}`, data);
+    return response.data;
+  },
+
+  deactivate: async (id) => {
+    const response = await apiClient.delete(`/staff/${id}`);
+    return response.data;
+  },
 };

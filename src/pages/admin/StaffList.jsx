@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useStaffList, useCreateStaff, useUpdateStaff } from '../../hooks/useStaff';
 import { 
   UserCheck, 
   Plus, 
@@ -16,7 +17,10 @@ import {
 } from 'lucide-react';
 
 export default function StaffList() {
-  const { staffList, transactions, addStaff, updateStaff } = useStore();
+  const { transactions } = useStore();
+  const { data: staffList = [], isLoading } = useStaffList();
+  const { mutate: createStaff, isPending: isCreating } = useCreateStaff();
+  const { mutate: updateStaffApi, isPending: isUpdating } = useUpdateStaff();
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeStaff, setActiveStaff] = useState(null);
 
@@ -62,34 +66,40 @@ export default function StaffList() {
     e.preventDefault();
     if (!name || !email || !password) return;
 
-    addStaff({
+    createStaff({
       name,
       phone,
       email,
       role,
       password,
-      status: 'active'
+    }, {
+      onSuccess: () => {
+        setShowAddModal(false);
+        resetForm();
+      }
     });
-    
-    setShowAddModal(false);
-    resetForm();
   };
 
   const handleEditSubmit = (e) => {
     e.preventDefault();
     if (!activeStaff) return;
 
-    updateStaff(activeStaff.id, {
-      name,
-      phone,
-      email,
-      role,
-      password,
-      status
+    updateStaffApi({
+      id: activeStaff.id,
+      data: {
+        name,
+        phone,
+        email,
+        role,
+        status,
+        ...(password ? { password } : {})
+      }
+    }, {
+      onSuccess: () => {
+        setActiveStaff(null);
+        resetForm();
+      }
     });
-
-    setActiveStaff(null);
-    resetForm();
   };
 
   const openEditModal = (staff) => {
@@ -98,7 +108,7 @@ export default function StaffList() {
     setPhone(staff.phone || '');
     setEmail(staff.email);
     setRole(staff.role);
-    setPassword(staff.password);
+    setPassword('');
     setStatus(staff.status);
   };
 
@@ -190,7 +200,7 @@ export default function StaffList() {
                   )}
                   <p className="text-slate-550 dark:text-slate-450 flex items-center space-x-2">
                     <Key className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                    <span className="font-mono">Code: {staff.password}</span>
+                    <span className="font-mono">Code: ••••••••</span>
                   </p>
                 </div>
               </div>
@@ -287,9 +297,11 @@ export default function StaffList() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-500 text-slate-955 hover:bg-emerald-400 font-bold rounded-xl shadow-sm"
+                  disabled={isCreating}
+                  className="px-4 py-2 bg-emerald-500 text-slate-955 hover:bg-emerald-400 font-bold rounded-xl shadow-sm disabled:opacity-60 flex items-center space-x-2"
                 >
-                  Create Staff
+                  {isCreating ? <span className="animate-spin w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full"></span> : null}
+                  <span>Create Staff</span>
                 </button>
               </div>
             </form>
@@ -343,10 +355,9 @@ export default function StaffList() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">PIN / Password *</label>
+                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">PIN / Password (Leave blank to keep)</label>
                   <input
                     type="password"
-                    required
                     placeholder="e.g. sales123"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -389,9 +400,11 @@ export default function StaffList() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold rounded-xl shadow-sm"
+                  disabled={isUpdating}
+                  className="px-4 py-2 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold rounded-xl shadow-sm disabled:opacity-60 flex items-center space-x-2"
                 >
-                  Save Changes
+                  {isUpdating ? <span className="animate-spin w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full"></span> : null}
+                  <span>Save Changes</span>
                 </button>
               </div>
             </form>
