@@ -52,37 +52,6 @@ const INITIAL_CUSTOMERS = [
   }
 ];
 
-const INITIAL_SUPPLIERS = [
-  { id: 'sup-1', name: 'Yara Ghana Limited', contactPerson: 'Daniel Alabi', phone: '0302123456', email: 'sales.ghana@yara.com', location: 'Tema, Greater Accra' },
-  { id: 'sup-2', name: 'Bayer West Africa', contactPerson: 'Evelyn Addo', phone: '0302765432', email: 'evelyn.addo@bayer.com', location: 'Accra, Greater Accra' },
-  { id: 'sup-3', name: 'RMG Ghana Ltd', contactPerson: 'Frank Osei', phone: '0302998877', email: 'f.osei@rmgghana.com', location: 'Tema Industrial Area' }
-];
-
-const INITIAL_PO = [
-  {
-    id: 'po-1',
-    poCode: 'LPO-2026-001',
-    supplierId: 'sup-1',
-    supplierName: 'Yara Ghana Limited',
-    status: 'ordered',
-    items: [
-      { productId: 'prod-2', name: 'NPK 15-15-15 Fertilizer', quantity: 20, unitPrice: 380.00 }
-    ],
-    createdAt: '2026-06-10T14:00:00Z'
-  },
-  {
-    id: 'po-2',
-    poCode: 'LPO-2026-002',
-    supplierId: 'sup-2',
-    supplierName: 'Bayer West Africa',
-    status: 'received',
-    items: [
-      { productId: 'prod-3', name: 'Confidor 200 SL', quantity: 15, unitPrice: 28.00 }
-    ],
-    createdAt: '2026-06-05T09:30:00Z'
-  }
-];
-
 const MOCK_STAFF = [
   { id: 'staff-1', name: 'Kwame Asante', phone: '0551234567', email: 'kwame@agrochem.com', role: 'admin', password: 'admin123', status: 'active' },
   { id: 'staff-2', name: 'Rita Asare', phone: '0547654321', email: 'rita@agrochem.com', role: 'sales', password: 'sales123', status: 'active' }
@@ -162,8 +131,7 @@ export const useStore = create((set, get) => ({
 
   // INVENTORY STATE
   products: [], // Kept temporarily so components don't crash while refactoring
-  suppliers: INITIAL_SUPPLIERS,
-  purchaseOrders: INITIAL_PO,
+
   adjustments: [],
 
   expenses: INITIAL_EXPENSES,
@@ -171,27 +139,7 @@ export const useStore = create((set, get) => ({
 
 
 
-  // SUPPLIER MANAGEMENT ACTIONS
-  addSupplier: (supplier) => {
-    const newSupplier = {
-      ...supplier,
-      id: `sup-${Date.now()}`
-    };
-    set(state => ({ suppliers: [...state.suppliers, newSupplier] }));
-    return newSupplier;
-  },
 
-  updateSupplier: (id, updatedFields) => {
-    set(state => ({
-      suppliers: state.suppliers.map(s => s.id === id ? { ...s, ...updatedFields } : s)
-    }));
-  },
-
-  deleteSupplier: (id) => {
-    set(state => ({
-      suppliers: state.suppliers.filter(s => s.id !== id)
-    }));
-  },
 
   // EXPENSE MANAGEMENT ACTIONS
   addExpense: (expense) => {
@@ -215,64 +163,7 @@ export const useStore = create((set, get) => ({
     }));
   },
 
-  // LPO & GRN PROCUREMENT ACTIONS
-  createPurchaseOrder: (poData) => {
-    const newPO = {
-      ...poData,
-      id: `po-${Date.now()}`,
-      poCode: `LPO-2026-${String(get().purchaseOrders.length + 1).padStart(3, '0')}`,
-      createdAt: new Date().toISOString()
-    };
-    set(state => ({ purchaseOrders: [...state.purchaseOrders, newPO] }));
-    return newPO;
-  },
 
-  receivePurchaseOrder: (poId, itemsToReceive) => {
-    // itemsToReceive is an array of objects: { productId, batchNumber, expiryDate, quantity, unitPrice }
-    const po = get().purchaseOrders.find(p => p.id === poId);
-    if (!po) return { success: false, message: 'Purchase Order not found' };
-
-    // Update PO status
-    set(state => ({
-      purchaseOrders: state.purchaseOrders.map(p => p.id === poId ? { ...p, status: 'received' } : p)
-    }));
-
-    // Update Products batches
-    itemsToReceive.forEach(item => {
-      set(state => ({
-        products: state.products.map(p => {
-          if (p.id !== item.productId) return p;
-
-          // Check if batch number already exists for this product
-          const batchIndex = p.batches.findIndex(b => b.batchNumber === item.batchNumber);
-          let newBatches = [...p.batches];
-
-          if (batchIndex > -1) {
-            newBatches[batchIndex] = {
-              ...newBatches[batchIndex],
-              quantity: newBatches[batchIndex].quantity + item.quantity
-            };
-          } else {
-            newBatches.push({
-              id: `batch-${Date.now()}-${Math.random()}`,
-              batchNumber: item.batchNumber,
-              quantity: item.quantity,
-              expiryDate: item.expiryDate,
-              receivedDate: new Date().toISOString().split('T')[0],
-              purchasePrice: item.unitPrice
-            });
-          }
-
-          return {
-            ...p,
-            batches: newBatches
-          };
-        })
-      }));
-    });
-
-    return { success: true };
-  },
 
   // CUSTOMER STATE
   customers: INITIAL_CUSTOMERS,

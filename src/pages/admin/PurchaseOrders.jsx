@@ -1,11 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { useProductList } from '../../hooks/useProduct';
+import { useSupplierList } from '../../hooks/useSupplier';
+import { usePurchaseOrderList, useCreatePurchaseOrder, useReceivePurchaseOrder } from '../../hooks/usePurchaseOrder';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { ClipboardList, Plus, Truck, CheckCircle2, ChevronRight, X } from 'lucide-react';
 
 export default function PurchaseOrders() {
-  const { purchaseOrders, suppliers, createPurchaseOrder, receivePurchaseOrder } = useStore();
+  const { data: purchaseOrders = [], isLoading } = usePurchaseOrderList();
+  const { data: suppliers = [] } = useSupplierList();
+  const { mutate: createPoApi, isPending: isCreating } = useCreatePurchaseOrder();
+  const { mutate: receivePoApi, isPending: isReceiving } = useReceivePurchaseOrder();
   const { data: products = [] } = useProductList();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
@@ -56,16 +61,18 @@ export default function PurchaseOrders() {
       return;
     }
 
-    createPurchaseOrder({
+    createPoApi({
       supplierId: selectedSupplierId,
       supplierName: activeSupplierName,
       status: 'ordered',
       items: poItems
+    }, {
+      onSuccess: () => {
+        setShowCreateModal(false);
+        setSelectedSupplierId('');
+        setPoItems([{ productId: '', quantity: 1, unitPrice: 0 }]);
+      }
     });
-
-    setShowCreateModal(false);
-    setSelectedSupplierId('');
-    setPoItems([{ productId: '', quantity: 1, unitPrice: 0 }]);
   };
 
   const openReceiveModal = (po) => {
@@ -107,14 +114,12 @@ export default function PurchaseOrders() {
       return;
     }
 
-    const res = receivePurchaseOrder(activePOToReceive.id, receivedArray);
-    if (res.success) {
-      alert('Goods Received Note (GRN) logged. Inventory levels and batches updated.');
-      setShowReceiveModal(false);
-      setActivePOToReceive(null);
-    } else {
-      alert(res.message);
-    }
+    receivePoApi({ id: activePOToReceive.id, data: { itemsToReceive: receivedArray } }, {
+      onSuccess: () => {
+        setShowReceiveModal(false);
+        setActivePOToReceive(null);
+      }
+    });
   };
 
   return (
@@ -149,7 +154,22 @@ export default function PurchaseOrders() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-150 dark:divide-slate-850">
-              {purchaseOrders.map(po => {
+              {isLoading ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-8 text-center text-slate-500">
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-4 h-4 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
+                      <span>Loading Purchase Orders...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : purchaseOrders.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-8 text-center text-slate-500">
+                    No purchase orders found. Create one to get started.
+                  </td>
+                </tr>
+              ) : purchaseOrders.map(po => {
                 const isReceived = po.status === 'received';
                 const totalCost = po.items.reduce((acc, it) => acc + (it.quantity * it.unitPrice), 0);
 
@@ -294,9 +314,10 @@ export default function PurchaseOrders() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-500 text-slate-955 hover:bg-emerald-400 font-bold rounded-xl shadow-sm"
+                  disabled={isCreating}
+                  className="px-4 py-2 bg-emerald-500 text-slate-955 hover:bg-emerald-400 font-bold rounded-xl shadow-sm disabled:opacity-50"
                 >
-                  Issue LPO
+                  {isCreating ? 'Issuing...' : 'Issue LPO'}
                 </button>
               </div>
             </form>
@@ -374,9 +395,10 @@ export default function PurchaseOrders() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold rounded-xl shadow-sm"
+                  disabled={isReceiving}
+                  className="px-5 py-2 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold rounded-xl shadow-sm disabled:opacity-50"
                 >
-                  Confirm Goods Receipt (GRN)
+                  {isReceiving ? 'Confirming...' : 'Confirm Goods Receipt (GRN)'}
                 </button>
               </div>
             </form>

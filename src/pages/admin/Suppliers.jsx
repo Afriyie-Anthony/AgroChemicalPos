@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { useSupplierList, useCreateSupplier, useUpdateSupplier, useDeleteSupplier } from '../../hooks/useSupplier';
+import { usePurchaseOrderList } from '../../hooks/usePurchaseOrder';
 import { useProductList } from '../../hooks/useProduct';
 import { Truck, Plus, Mail, Phone, MapPin, X, LayoutGrid, List, Info, Trash2 } from 'lucide-react';
 
 export default function Suppliers() {
-  const { purchaseOrders, showAlert } = useStore();
+  const { showAlert } = useStore();
+  const { data: purchaseOrders = [] } = usePurchaseOrderList();
   const { data: products = [] } = useProductList();
   const { data: suppliers = [], isLoading } = useSupplierList();
   const { mutate: createSupplierApi, isPending: isCreating } = useCreateSupplier();
