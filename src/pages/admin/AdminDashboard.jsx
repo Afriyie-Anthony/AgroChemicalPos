@@ -36,12 +36,14 @@ import CategoryDistributionChart from '../../components/dashboard/admin/Category
 
 export default function AdminDashboard() {
   const { currentUser } = useStore();
-  const { data: products = [] } = useProductList();
-  const { data: customers = [] } = useCustomers();
-  const { data: expenses = [] } = useExpenses({});
-  const { data: transactions = [] } = useTransactions({});
+  const { data: products = [], isLoading: loadingProducts } = useProductList();
+  const { data: customers = [], isLoading: loadingCustomers } = useCustomers();
+  const { data: expenses = [], isLoading: loadingExpenses } = useExpenses({});
+  const { data: transactions = [], isLoading: loadingTransactions } = useTransactions({});
   const [timeFilter, setTimeFilter] = useState('day'); // 'day', 'month', 'year'
   const isAdmin = currentUser?.role === 'admin';
+
+  const isLoading = loadingProducts || loadingCustomers || loadingExpenses || loadingTransactions;
 
   // Filter transactions dynamically based on selected timeframe
   const filteredTransactions = useMemo(() => {
@@ -226,6 +228,15 @@ export default function AdminDashboard() {
     });
     return list.sort((a, b) => a.daysLeft - b.daysLeft).slice(0, 4);
   }, [products]);
+
+  if (isLoading) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+        <p className="text-sm font-semibold text-slate-500">Loading Dashboard Data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 text-slate-800 dark:text-slate-100 font-sans">

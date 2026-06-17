@@ -1,17 +1,9 @@
 import { create } from 'zustand';
 
-const MOCK_STAFF = [
-  { id: 'staff-1', name: 'Kwame Asante', phone: '0551234567', email: 'kwame@agrochem.com', role: 'admin', password: 'admin123', status: 'active' },
-  { id: 'staff-2', name: 'Rita Asare', phone: '0547654321', email: 'rita@agrochem.com', role: 'sales', password: 'sales123', status: 'active' }
-];
-
-
-
 export const useStore = create((set, get) => ({
   // AUTHENTICATION STATE
   currentUser: null,
   isAuthenticated: false,
-  staffList: MOCK_STAFF,
   theme: 'light', // 'light' or 'dark'
 
   // CUSTOM ALERT STATE
@@ -21,15 +13,10 @@ export const useStore = create((set, get) => ({
 
   toggleTheme: () => set(state => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
 
-  login: (email, password) => {
-    const staff = get().staffList.find(
-      s => s.email.toLowerCase() === email.toLowerCase() && s.password === password && s.status === 'active'
-    );
-    if (staff) {
-      set({ currentUser: staff, isAuthenticated: true });
-      return { success: true, user: staff };
-    }
-    return { success: false, message: 'Invalid email or password' };
+  login: (user) => {
+    // API-driven login sets this state from AuthController
+    set({ currentUser: user, isAuthenticated: true });
+    return { success: true, user };
   },
 
   logout: () => {
@@ -43,27 +30,6 @@ export const useStore = create((set, get) => ({
 
 
   expenseCategories: ['Utilities', 'Transport & Logistics', 'Rent', 'Maintenance & Repairs', 'Staff Welfare', 'Marketing & Advertising', 'Office Supplies', 'Insurance', 'Taxes & Levies', 'Miscellaneous'],
-  // STAFF MANAGEMENT
-  addStaff: (staff) => {
-    const newStaff = {
-      ...staff,
-      id: `staff-${Date.now()}`,
-      status: 'active'
-    };
-    set(state => ({ staffList: [...state.staffList, newStaff] }));
-    return newStaff;
-  },
-
-  updateStaff: (id, updatedFields) => {
-    set(state => {
-      const updatedList = state.staffList.map(s => s.id === id ? { ...s, ...updatedFields } : s);
-      const isSelf = state.currentUser?.id === id;
-      return {
-        staffList: updatedList,
-        currentUser: isSelf ? { ...state.currentUser, ...updatedFields } : state.currentUser
-      };
-    });
-  },
 
   // POS / CART STATE
   cart: [],

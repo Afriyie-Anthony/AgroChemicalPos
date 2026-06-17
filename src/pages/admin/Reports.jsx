@@ -5,6 +5,8 @@ import { usePurchaseOrderList } from '../../hooks/usePurchaseOrder';
 import { useCustomers } from '../../hooks/useCustomers';
 import { useExpenses } from '../../hooks/useExpenses';
 import { useTransactions } from '../../hooks/useTransactions';
+import { useStaffList } from '../../hooks/useStaff';
+import { useAdjustmentsReport } from '../../hooks/useReports';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { 
   TrendingUp, 
@@ -38,13 +40,16 @@ import {
 } from 'recharts';
 
 export default function Reports() {
-  const { adjustments, staffList } = useStore();
-  const { data: products = [] } = useProductList();
-  const { data: purchaseOrders = [] } = usePurchaseOrderList();
-  const { data: customers = [] } = useCustomers();
-  const { data: expenses = [] } = useExpenses({});
-  const { data: transactions = [] } = useTransactions({});
+  const { data: products = [], isLoading: loadingProducts } = useProductList();
+  const { data: purchaseOrders = [], isLoading: loadingPOs } = usePurchaseOrderList();
+  const { data: customers = [], isLoading: loadingCustomers } = useCustomers();
+  const { data: expenses = [], isLoading: loadingExpenses } = useExpenses({});
+  const { data: transactions = [], isLoading: loadingTransactions } = useTransactions({});
+  const { data: staffList = [], isLoading: loadingStaff } = useStaffList();
+  const { data: adjustments = [], isLoading: loadingAdjustments } = useAdjustmentsReport({});
   const [activeTab, setActiveTab] = useState('financials'); 
+
+  const isLoading = loadingProducts || loadingPOs || loadingCustomers || loadingExpenses || loadingTransactions || loadingStaff || loadingAdjustments;
   // Tabs: 'financials', 'tax', 'inventory', 'debtors', 'staff', 'movement'
   const [dateFilter, setDateFilter] = useState('all'); // 'all', 'today', 'week', 'month'
 
@@ -353,7 +358,7 @@ export default function Reports() {
     (adjustments || []).forEach(adj => {
       if (adj.reason === 'sale' || adj.reason === 'void') return;
 
-      const qty = Math.abs(adj.quantityChange);
+      const qty = Math.abs(adj.quantityChange || 0);
       const direction = adj.quantityChange < 0 ? 'out' : 'in';
       const reasonLabels = {
         damage: 'Spillage / Damage',
@@ -364,15 +369,15 @@ export default function Reports() {
 
       movements.push({
         id: adj.id,
-        date: adj.date,
+        date: adj.createdAt || adj.date,
         type: direction,
         typeLabel: `Adjustment (${reasonLabels[adj.reason] || adj.reason})`,
-        productName: adj.productName,
+        productName: adj.productName || 'Unknown Product',
         quantity: qty,
         unit: 'Units',
-        batchNumber: adj.batchNumber,
+        batchNumber: adj.batchNumber || 'N/A',
         reference: 'INV-ADJ',
-        user: adj.user
+        user: adj.staff?.name || adj.user || 'Unknown'
       });
     });
 
@@ -465,8 +470,17 @@ export default function Reports() {
     padding: '8px 12px'
   };
 
+  if (isLoading) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+        <p className="text-sm font-semibold text-slate-500">Generating Reports Data...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 text-slate-800 dark:text-slate-100 font-sans">
+    <div className="space-y-6 text-slate-800 dark:text-slate-100 font-sans pb-12">
       {/* Header Panel */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
         <div>

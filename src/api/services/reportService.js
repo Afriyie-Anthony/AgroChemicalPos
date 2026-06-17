@@ -6,4 +6,5 @@ export const reportService = {
   getInventory: () => apiClient.get('/reports/inventory').then((r) => r.data),
   getExpenses: (params) => apiClient.get('/reports/expenses', { params }).then((r) => r.data),
   getProfitLoss: (params) => apiClient.get('/reports/profit-loss', { params }).then((r) => r.data),
+  getAdjustments: (params) => apiClient.get('/reports/adjustments', { params }).then((r) => r.data),
 };

@@ -39,3 +39,11 @@ export const useProfitLoss = (params) => {
     enabled: !!params,
   });
 };
+
+export const useAdjustmentsReport = (params) => {
+  return useQuery({
+    queryKey: ['reports', 'adjustments', params],
+    queryFn: () => reportService.getAdjustments(params).then((r) => r.data),
+    // Pass empty params object if you want to fetch all by default, or just don't pass enabled: false
+  });
+};
