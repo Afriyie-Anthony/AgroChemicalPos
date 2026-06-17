@@ -3,8 +3,12 @@ import { useStore } from '../../store/useStore';
 import { formatCurrency, formatDateTime } from '../../utils/formatters';
 import { Receipt, Search, Eye, AlertCircle, X, ShieldAlert, Check, Printer } from 'lucide-react';
 
+import { useTransactions, useVoidTransaction } from '../../hooks/useTransactions';
+
 export default function TransactionsList() {
-  const { transactions, voidTransaction, showAlert } = useStore();
+  const { showAlert } = useStore();
+  const { data: transactions = [], isLoading } = useTransactions({});
+  const { mutateAsync: voidTransactionApi } = useVoidTransaction();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMethod, setSelectedMethod] = useState('All');
   
@@ -26,20 +30,20 @@ export default function TransactionsList() {
     });
   }, [transactions, searchQuery, selectedMethod]);
 
-  const handleVoidSubmit = (e) => {
+  const handleVoidSubmit = async (e) => {
     e.preventDefault();
     if (!activeTrx || !voidReason) return;
 
-    const res = voidTransaction(activeTrx.id, voidReason);
-    if (res.success) {
+    try {
+      await voidTransactionApi({ id: activeTrx.id, data: { voidReason } });
       showAlert('Transaction successfully voided. Stock returned to inventory.', 'success', 'Transaction Voided');
-      // Refresh local modal state
-      const updated = transactions.find(t => t.id === activeTrx.id);
-      setActiveTrx(updated);
+      
+      // Update local modal state with voided status so it displays correctly before unmounting
+      setActiveTrx({ ...activeTrx, status: 'voided', voidReason, voidedAt: new Date().toISOString() });
       setShowVoidDialog(false);
       setVoidReason('');
-    } else {
-      showAlert(res.message || 'Failed to void transaction', 'error', 'Error');
+    } catch (error) {
+      showAlert(error.response?.data?.message || 'Failed to void transaction', 'error', 'Error');
     }
   };
 
@@ -99,40 +103,64 @@ export default function TransactionsList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-150 dark:divide-slate-850">
-              {filteredTransactions.map(t => {
-                const isVoided = t.status === 'voided';
-                return (
-                  <tr key={t.id} className={`hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors text-xs ${isVoided ? 'opacity-50 line-through' : ''}`}>
-                    <td className="px-6 py-4 font-mono font-bold text-slate-850 dark:text-slate-200">{t.transactionCode}</td>
-                    <td className="px-6 py-4 text-slate-500 dark:text-slate-400">{formatDateTime(t.createdAt)}</td>
-                    <td className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300">{t.customer?.name || 'Walk-in Customer'}</td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{t.cashierName}</td>
-                    <td className="px-6 py-4 font-bold text-slate-800 dark:text-slate-100">{formatCurrency(t.total)}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-1.5">
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
-                          isVoided 
-                            ? 'bg-red-500/10 text-red-500 border border-red-500/20' 
-                            : 'bg-emerald-500/10 text-emerald-655 dark:text-emerald-450 border border-emerald-500/20'
-                        }`}>
-                          {isVoided ? 'VOIDED' : 'SUCCESS'}
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-16">
+                    <div className="flex justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredTransactions.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-16">
+                    <div className="flex flex-col items-center gap-3 text-slate-400 dark:text-slate-500">
+                      <Receipt className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-2" />
+                      <p className="text-lg font-semibold text-slate-500 dark:text-slate-400">No transactions found</p>
+                      <p className="text-sm">Try adjusting your search or filters.</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredTransactions.map(t => {
+                  const isVoided = t.status === 'voided';
+                  return (
+                    <tr key={t.id} className={`hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors text-xs ${isVoided ? 'opacity-50 line-through' : ''}`}>
+                      <td className="px-6 py-4 font-mono font-bold text-slate-850 dark:text-slate-200">{t.transactionCode}</td>
+                      <td className="px-6 py-4 text-slate-500 dark:text-slate-400">{formatDateTime(t.createdAt)}</td>
+                      <td className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300">{t.customer?.name || 'Walk-in Customer'}</td>
+                      <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{t.cashierName}</td>
+                      <td className="px-6 py-4">
+                        <span className="font-bold text-slate-800 dark:text-slate-100">
+                          GHS {Number(t.total).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
                         </span>
-                        <span className="text-[10px] text-slate-450 uppercase font-semibold">
-                          ({t.paymentMethod})
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <button
-                        onClick={() => setActiveTrx(t)}
-                        className="p-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-300"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-1.5">
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                            isVoided 
+                              ? 'bg-red-500/10 text-red-500 border border-red-500/20' 
+                              : 'bg-emerald-500/10 text-emerald-655 dark:text-emerald-450 border border-emerald-500/20'
+                          }`}>
+                            {isVoided ? 'VOIDED' : 'SUCCESS'}
+                          </span>
+                          <span className="text-[10px] text-slate-450 uppercase font-semibold">
+                            ({t.paymentMethod})
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => setActiveTrx(t)}
+                          className="p-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-300"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

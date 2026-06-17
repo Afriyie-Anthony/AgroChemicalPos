@@ -4,6 +4,7 @@ import { formatCurrency } from '../../utils/formatters';
 import { useProductList } from '../../hooks/useProduct';
 import { useCategoryList } from '../../hooks/useCategory';
 import { useCustomers } from '../../hooks/useCustomers';
+import { useCheckout } from '../../hooks/useTransactions';
 import {
   Search,
   Trash2,
@@ -35,9 +36,10 @@ export default function PosTerminal() {
     holdCart,
     resumeCart,
     addCustomer,
-    checkout,
     showAlert
   } = useStore();
+
+  const { mutateAsync: checkoutApi, isPending: isCheckingOut } = useCheckout();
 
   const { data: customers = [] } = useCustomers();
   const [searchQuery, setSearchQuery] = useState('');
@@ -128,13 +130,22 @@ export default function PosTerminal() {
   };
 
   // Submit Sale Checkout
-  const handleProcessCheckout = (e) => {
-    e.preventDefault();
+  const handleProcessCheckout = async () => {
     setCheckoutError('');
+    if (cart.length === 0) return;
 
     const total = cartSummary.total;
-    let paymentDetails = {
-      method: payMethod,
+    let payload = {
+      items: cart.map(item => ({
+        productId: item.productId || item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        discount: item.discount || 0,
+        batchId: item.batchId
+      })),
+      customerId: selectedCustomer ? selectedCustomer.id : null,
+      paymentMethod: payMethod,
       amountPaid: total,
       details: {}
     };
@@ -145,17 +156,15 @@ export default function PosTerminal() {
         setCheckoutError(`Cash tendered must be at least GHS ${total.toFixed(2)}`);
         return;
       }
-      paymentDetails.amountPaid = tendered;
+      payload.amountPaid = tendered;
     } else if (payMethod === 'momo') {
       if (!momoNumber || momoNumber.length < 9) {
         setCheckoutError('Please enter a valid Mobile Money number');
         return;
       }
-      paymentDetails.details = {
-        network: momoNetwork,
-        reference: momoReference || `MOMO-${Date.now().toString().slice(-6)}`,
-        momoNumber
-      };
+      payload.details.momoNumber = momoNumber;
+      payload.details.momoNetwork = momoNetwork;
+      payload.details.paymentReference = momoReference || `MOMO-${Date.now().toString().slice(-6)}`;
     } else if (payMethod === 'split') {
       const cashVal = parseFloat(splitAmounts.cash) || 0;
       const momoVal = parseFloat(splitAmounts.momo) || 0;
@@ -163,8 +172,7 @@ export default function PosTerminal() {
         setCheckoutError(`Combined split amounts (GHS ${(cashVal + momoVal).toFixed(2)}) must equal cart total (GHS ${total.toFixed(2)})`);
         return;
       }
-      paymentDetails.splitAmounts = { cash: cashVal, momo: momoVal };
-      paymentDetails.amountPaid = total;
+      payload.details.split = splitAmounts;
     } else if (payMethod === 'credit') {
       if (!selectedCustomer) {
         setCheckoutError('A customer must be attached for credit checkouts');
@@ -177,17 +185,18 @@ export default function PosTerminal() {
       }
     }
 
-    const res = checkout(paymentDetails);
-    if (res.success) {
-      setCompletedTransaction(res.transaction);
+    try {
+      const res = await checkoutApi(payload);
+      setCompletedTransaction(res.data);
       setShowCheckoutModal(false);
       setShowReceiptModal(true);
       setCashTendered('');
       setMomoNumber('');
       setMomoReference('');
       setSplitAmounts({ cash: 0, momo: 0 });
-    } else {
-      setCheckoutError(res.message || 'Checkout failed');
+      clearCart();
+    } catch (error) {
+      setCheckoutError(error.response?.data?.message || 'Checkout failed');
     }
   };
 
@@ -710,9 +719,17 @@ export default function PosTerminal() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold rounded-xl text-xs shadow-sm"
+                  disabled={isCheckingOut}
+                  className="px-5 py-2 flex items-center gap-2 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold rounded-xl text-xs shadow-sm disabled:opacity-50"
                 >
-                  Confirm checkout
+                  {isCheckingOut ? (
+                    <>
+                      <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-slate-950"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    'Confirm checkout'
+                  )}
                 </button>
               </div>
             </form>

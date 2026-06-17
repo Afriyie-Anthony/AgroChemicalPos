@@ -4,6 +4,7 @@ import { useProductList } from '../../hooks/useProduct';
 import { usePurchaseOrderList } from '../../hooks/usePurchaseOrder';
 import { useCustomers } from '../../hooks/useCustomers';
 import { useExpenses } from '../../hooks/useExpenses';
+import { useTransactions } from '../../hooks/useTransactions';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { 
   TrendingUp, 
@@ -37,11 +38,12 @@ import {
 } from 'recharts';
 
 export default function Reports() {
-  const { transactions, adjustments, staffList } = useStore();
+  const { adjustments, staffList } = useStore();
   const { data: products = [] } = useProductList();
   const { data: purchaseOrders = [] } = usePurchaseOrderList();
   const { data: customers = [] } = useCustomers();
   const { data: expenses = [] } = useExpenses({});
+  const { data: transactions = [] } = useTransactions({});
   const [activeTab, setActiveTab] = useState('financials'); 
   // Tabs: 'financials', 'tax', 'inventory', 'debtors', 'staff', 'movement'
   const [dateFilter, setDateFilter] = useState('all'); // 'all', 'today', 'week', 'month'
