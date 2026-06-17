@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { useCategoryList, useCreateCategory, useUpdateCategory, useDeleteCategory } from '../../hooks/useCategory';
+import { useProductList } from '../../hooks/useProduct';
 import { Tags, Plus, X, Edit, Trash2, AlertTriangle, Layers } from 'lucide-react';
 
 export default function Categories() {
-  const { products, showAlert } = useStore();
+  const { showAlert } = useStore();
+  const { data: products = [] } = useProductList();
   const { data: categories = [] } = useCategoryList();
   const { mutate: createCategoryApi, isPending: isCreating } = useCreateCategory();
   const { mutate: updateCategoryApi, isPending: isUpdating } = useUpdateCategory();

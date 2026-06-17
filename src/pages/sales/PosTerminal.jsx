@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { formatCurrency } from '../../utils/formatters';
+import { useProductList } from '../../hooks/useProduct';
+import { useCategoryList } from '../../hooks/useCategory';
 import {
   Search,
   Trash2,
@@ -18,7 +20,6 @@ import {
 
 export default function PosTerminal() {
   const {
-    products,
     customers,
     cart,
     selectedCustomer,
@@ -33,12 +34,14 @@ export default function PosTerminal() {
     holdCart,
     resumeCart,
     addCustomer,
-    checkout,
-    categories
+    checkout
   } = useStore();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+  
+  const { data: products = [], isLoading: isProductsLoading } = useProductList();
+  const { data: categoriesData = [] } = useCategoryList();
   
   // Checkout & Customer Modals State
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
@@ -61,7 +64,7 @@ export default function PosTerminal() {
   const [splitAmounts, setSplitAmounts] = useState({ cash: 0, momo: 0 });
   const [checkoutError, setCheckoutError] = useState('');
 
-  const categoriesList = useMemo(() => ['All', ...categories], [categories]);
+  const categoriesList = useMemo(() => ['All', ...categoriesData.map(c => c.name)], [categoriesData]);
 
   // Smart search and category filtering
   const filteredProducts = useMemo(() => {
@@ -247,7 +250,12 @@ export default function PosTerminal() {
 
         {/* Products Grid */}
         <div className="flex-1 overflow-y-auto pr-1">
-          {filteredProducts.length === 0 ? (
+          {isProductsLoading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
+              <p className="mt-4 text-xs text-slate-500 font-medium">Loading Products...</p>
+            </div>
+          ) : filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
               <span className="text-3xl mb-2">🌿</span>
               <p className="text-xs">No active products match your filter search</p>

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import { useLogout } from '../../hooks/useAuth';
 import { useSettings } from '../../hooks/useSettings';
+import { useProductList } from '../../hooks/useProduct';
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -29,7 +30,8 @@ import {
 } from 'lucide-react';
 
 export default function Layout({ children }) {
-  const { currentUser, theme, toggleTheme, products, customers } = useStore();
+  const { currentUser, theme, toggleTheme, customers } = useStore();
+  const { data: products = [] } = useProductList();
   const navigate = useNavigate();
   const location = useLocation();
   const logout = useLogout();

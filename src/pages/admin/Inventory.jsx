@@ -1,10 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useProductList, useCreateProduct, useAdjustStock } from '../../hooks/useProduct';
+import { useCategoryList } from '../../hooks/useCategory';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { Plus, X, AlertTriangle, FileSpreadsheet, Package, Layers, Info } from 'lucide-react';
 
 export default function Inventory() {
-  const { products, addProduct, adjustStock, categories } = useStore();
+  const { data: products = [], isLoading } = useProductList();
+  const { data: categoriesData = [] } = useCategoryList();
+  const categories = categoriesData.map(c => c.name);
+
+  const { mutate: createProductApi, isPending: isCreating } = useCreateProduct();
+  const { mutate: adjustStockApi, isPending: isAdjusting } = useAdjustStock();
   const [selectedCategory, setSelectedCategory] = useState('All');
   
   // Modals/Drawers toggle state
@@ -69,23 +76,26 @@ export default function Inventory() {
       ]
     };
 
-    addProduct(productPayload);
-    setShowAddModal(false);
-    
-    // Reset Form
-    setNewProd({
-      name: '',
-      brand: '',
-      category: categories[0] || 'Pesticides',
-      unit: 'Litre',
-      costPrice: '',
-      retailPrice: '',
-      wholesalePrice: '',
-      reorderLevel: 5,
-      barcode: '',
-      batchNumber: '',
-      batchQty: '',
-      expiryDate: ''
+    createProductApi(productPayload, {
+      onSuccess: () => {
+        setShowAddModal(false);
+        
+        // Reset Form
+        setNewProd({
+          name: '',
+          brand: '',
+          category: categories[0] || 'Pesticides',
+          unit: 'Litre',
+          costPrice: '',
+          retailPrice: '',
+          wholesalePrice: '',
+          reorderLevel: 5,
+          barcode: '',
+          batchNumber: '',
+          batchQty: '',
+          expiryDate: ''
+        });
+      }
     });
   };
 
@@ -94,12 +104,18 @@ export default function Inventory() {
     if (!activeProductForAdjust || !activeBatchForAdjust || !adjustQty) return;
     
     const qtyChange = parseFloat(adjustQty);
-    adjustStock(activeProductForAdjust.id, activeBatchForAdjust, qtyChange, adjustReason);
     
-    setShowAdjustModal(false);
-    setActiveProductForAdjust(null);
-    setActiveBatchForAdjust('');
-    setAdjustQty('');
+    adjustStockApi({ 
+      id: activeProductForAdjust.id, 
+      data: { batchId: activeBatchForAdjust, quantityChange: qtyChange, reason: adjustReason }
+    }, {
+      onSuccess: () => {
+        setShowAdjustModal(false);
+        setActiveProductForAdjust(null);
+        setActiveBatchForAdjust('');
+        setAdjustQty('');
+      }
+    });
   };
 
   return (
@@ -150,7 +166,16 @@ export default function Inventory() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {filteredProducts.map((p) => {
+              {isLoading ? (
+                <tr>
+                  <td colSpan="5" className="px-6 py-20 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
+                      <p className="mt-4 text-slate-500 font-medium">Loading Inventory...</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredProducts.map((p) => {
                 const totalStock = p.batches.reduce((sum, b) => sum + b.quantity, 0);
                 const isLowStock = totalStock <= p.reorderLevel;
 
@@ -363,9 +388,11 @@ export default function Inventory() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold rounded-xl text-xs shadow-sm"
+                  disabled={isCreating}
+                  className="px-4 py-2 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold rounded-xl text-xs shadow-sm flex items-center space-x-2 disabled:opacity-60"
                 >
-                  Save Product
+                  {isCreating && <div className="w-3.5 h-3.5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>}
+                  <span>Save Product</span>
                 </button>
               </div>
             </form>
@@ -439,9 +466,11 @@ export default function Inventory() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold rounded-xl text-xs shadow-sm"
+                  disabled={isAdjusting}
+                  className="px-4 py-2 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold rounded-xl text-xs shadow-sm flex items-center space-x-2 disabled:opacity-60"
                 >
-                  Apply Adjustment
+                  {isAdjusting && <div className="w-3.5 h-3.5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>}
+                  <span>Apply Adjustment</span>
                 </button>
               </div>
             </form>

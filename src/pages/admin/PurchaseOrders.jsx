@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useProductList } from '../../hooks/useProduct';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { ClipboardList, Plus, Truck, CheckCircle2, ChevronRight, X } from 'lucide-react';
 
 export default function PurchaseOrders() {
-  const { purchaseOrders, suppliers, products, createPurchaseOrder, receivePurchaseOrder } = useStore();
+  const { purchaseOrders, suppliers, createPurchaseOrder, receivePurchaseOrder } = useStore();
+  const { data: products = [] } = useProductList();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
   

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useProductList } from '../../hooks/useProduct';
 import { formatCurrency } from '../../utils/formatters';
 import {
   AlertTriangle,
@@ -31,7 +32,8 @@ import TopProductsChart from '../../components/dashboard/admin/TopProductsChart'
 import CategoryDistributionChart from '../../components/dashboard/admin/CategoryDistributionChart';
 
 export default function AdminDashboard() {
-  const { products, customers, transactions, expenses, currentUser } = useStore();
+  const { customers, transactions, expenses, currentUser } = useStore();
+  const { data: products = [] } = useProductList();
   const [timeFilter, setTimeFilter] = useState('day'); // 'day', 'month', 'year'
   const isAdmin = currentUser?.role === 'admin';
 

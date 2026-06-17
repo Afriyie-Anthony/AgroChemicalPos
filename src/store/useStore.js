@@ -8,129 +8,7 @@ const INITIAL_EXPENSES = [
   { id: 'exp-4', description: 'Knapsack sprayer repair parts', category: 'Maintenance & Repairs', amount: 85.00, date: '2026-06-10', paidBy: 'Rita Asare', paymentMethod: 'momo', reference: 'MTN-8829371', notes: 'Spare nozzles and hoses' },
   { id: 'exp-5', description: 'Staff lunch allowance', category: 'Staff Welfare', amount: 120.00, date: '2026-06-12', paidBy: 'Kwame Asante', paymentMethod: 'cash', reference: '', notes: 'Weekly lunch allowance for 3 staff' },
 ];
-const INITIAL_PRODUCTS = [
-  {
-    id: 'prod-1',
-    name: 'Glyphosate 480 SL (Weedone)',
-    brand: 'Weedone',
-    category: 'Herbicides',
-    unit: 'Litre',
-    costPrice: 45.00,
-    retailPrice: 65.00,
-    wholesalePrice: 58.00,
-    reorderLevel: 20,
-    barcode: '6001234567891',
-    status: 'active',
-    image: '',
-    batches: [
-      { id: 'b1-1', batchNumber: 'GLY-B024', quantity: 35, expiryDate: '2026-10-15', receivedDate: '2025-05-10', purchasePrice: 45.00 },
-      { id: 'b1-2', batchNumber: 'GLY-B025', quantity: 50, expiryDate: '2027-04-20', receivedDate: '2025-06-01', purchasePrice: 46.00 }
-    ]
-  },
-  {
-    id: 'prod-2',
-    name: 'NPK 15-15-15 Fertilizer',
-    brand: 'Yara',
-    category: 'Fertilizers',
-    unit: '50kg Bag',
-    costPrice: 380.00,
-    retailPrice: 450.00,
-    wholesalePrice: 420.00,
-    reorderLevel: 15,
-    barcode: '6009876543210',
-    status: 'active',
-    image: '',
-    batches: [
-      { id: 'b2-1', batchNumber: 'NPK-Y-2025', quantity: 28, expiryDate: '2028-12-31', receivedDate: '2025-04-20', purchasePrice: 380.00 }
-    ]
-  },
-  {
-    id: 'prod-3',
-    name: 'Confidor 200 SL',
-    brand: 'Bayer',
-    category: 'Pesticides',
-    unit: '250ml Bottle',
-    costPrice: 28.00,
-    retailPrice: 45.00,
-    wholesalePrice: 38.00,
-    reorderLevel: 10,
-    barcode: '4008455021234',
-    status: 'active',
-    image: '',
-    batches: [
-      { id: 'b3-1', batchNumber: 'CONF-B992', quantity: 3, expiryDate: '2026-07-30', receivedDate: '2025-03-12', purchasePrice: 28.00 },
-      { id: 'b3-2', batchNumber: 'CONF-B993', quantity: 15, expiryDate: '2027-02-18', receivedDate: '2025-06-05', purchasePrice: 29.00 }
-    ]
-  },
-  {
-    id: 'prod-4',
-    name: 'Seed Co SC 719 Maize Seeds',
-    brand: 'Seed Co',
-    category: 'Seeds',
-    unit: '2kg Pack',
-    costPrice: 50.00,
-    retailPrice: 75.00,
-    wholesalePrice: 68.00,
-    reorderLevel: 12,
-    barcode: '789654123012',
-    status: 'active',
-    image: '',
-    batches: [
-      { id: 'b4-1', batchNumber: 'MZ-SC719-24', quantity: 45, expiryDate: '2026-09-01', receivedDate: '2025-05-15', purchasePrice: 50.00 }
-    ]
-  },
-  {
-    id: 'prod-5',
-    name: 'Aspee Knapsack Sprayer',
-    brand: 'Aspee',
-    category: 'Farm Tools & Equipment',
-    unit: 'Piece',
-    costPrice: 220.00,
-    retailPrice: 320.00,
-    wholesalePrice: 290.00,
-    reorderLevel: 5,
-    barcode: '8901234567893',
-    status: 'active',
-    image: '',
-    batches: [
-      { id: 'b5-1', batchNumber: 'ASP-KNP-2025', quantity: 12, expiryDate: '2030-01-01', receivedDate: '2025-02-10', purchasePrice: 220.00 }
-    ]
-  },
-  {
-    id: 'prod-6',
-    name: 'YaraMila Actyva Fertilizer',
-    brand: 'Yara',
-    category: 'Fertilizers',
-    unit: '50kg Bag',
-    costPrice: 410.00,
-    retailPrice: 480.00,
-    wholesalePrice: 450.00,
-    reorderLevel: 15,
-    barcode: '6001234567800',
-    status: 'active',
-    image: '',
-    batches: [
-      { id: 'b6-1', batchNumber: 'YMA-B25', quantity: 3, expiryDate: '2028-11-20', receivedDate: '2025-04-18', purchasePrice: 410.00 }
-    ]
-  },
-  {
-    id: 'prod-7',
-    name: 'Caterpillar Killer (Bacillus)',
-    brand: 'EcoAgro',
-    category: 'Organic & Bio Inputs',
-    unit: '100g Sachet',
-    costPrice: 15.00,
-    retailPrice: 25.00,
-    wholesalePrice: 20.00,
-    reorderLevel: 20,
-    barcode: '6001234560012',
-    status: 'active',
-    image: '',
-    batches: [
-      { id: 'b7-1', batchNumber: 'BT-CAT-24', quantity: 40, expiryDate: '2026-08-30', receivedDate: '2025-05-18', purchasePrice: 15.00 }
-    ]
-  }
-];
+
 
 const INITIAL_CUSTOMERS = [
   {
@@ -283,67 +161,15 @@ export const useStore = create((set, get) => ({
   clearCurrentUser: () => set({ currentUser: null, isAuthenticated: false }),
 
   // INVENTORY STATE
-  products: INITIAL_PRODUCTS,
+  products: [], // Kept temporarily so components don't crash while refactoring
   suppliers: INITIAL_SUPPLIERS,
   purchaseOrders: INITIAL_PO,
   adjustments: [],
-  categories: ['Pesticides', 'Herbicides', 'Fertilizers', 'Seeds', 'Farm Tools & Equipment', 'Organic & Bio Inputs'],
+
   expenses: INITIAL_EXPENSES,
   expenseCategories: ['Utilities', 'Transport & Logistics', 'Rent', 'Maintenance & Repairs', 'Staff Welfare', 'Marketing & Advertising', 'Office Supplies', 'Insurance', 'Taxes & Levies', 'Miscellaneous'],
 
-  addProduct: (product) => {
-    const newProduct = {
-      ...product,
-      id: `prod-${Date.now()}`,
-      batches: product.batches.map((b, index) => ({
-        ...b,
-        id: `batch-${Date.now()}-${index}`
-      }))
-    };
-    set(state => ({ products: [...state.products, newProduct] }));
-  },
 
-  updateProduct: (id, updatedFields) => {
-    set(state => ({
-      products: state.products.map(p => p.id === id ? { ...p, ...updatedFields } : p)
-    }));
-  },
-
-  adjustStock: (productId, batchId, quantityChange, reason) => {
-    if (quantityChange === 0) return;
-
-    set(state => {
-      const product = state.products.find(p => p.id === productId);
-      const batch = product?.batches.find(b => b.id === batchId);
-      if (!product || !batch) return {};
-
-      const newAdjustment = {
-        id: `adj-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        productId,
-        productName: product.name,
-        batchId,
-        batchNumber: batch.batchNumber,
-        quantityChange,
-        reason,
-        date: new Date().toISOString(),
-        user: state.currentUser?.name || 'System Admin'
-      };
-
-      return {
-        products: state.products.map(p => {
-          if (p.id !== productId) return p;
-          return {
-            ...p,
-            batches: p.batches.map(b => {
-              if (b.id !== batchId) return b;
-              return { ...b, quantity: Math.max(0, b.quantity + quantityChange) };
-            })
-          };
-        }),
-        adjustments: [newAdjustment, ...(state.adjustments || [])]
-      };
-    });
-  },
 
   // SUPPLIER MANAGEMENT ACTIONS
   addSupplier: (supplier) => {
@@ -364,33 +190,6 @@ export const useStore = create((set, get) => ({
   deleteSupplier: (id) => {
     set(state => ({
       suppliers: state.suppliers.filter(s => s.id !== id)
-    }));
-  },
-
-  // CATEGORY MANAGEMENT ACTIONS
-  addCategory: (name) => {
-    set(state => {
-      if (state.categories.includes(name)) return {};
-      return { categories: [...state.categories, name] };
-    });
-  },
-
-  updateCategory: (oldName, newName) => {
-    set(state => {
-      const updatedCategories = state.categories.map(cat => cat === oldName ? newName : cat);
-      const updatedProducts = state.products.map(prod => 
-        prod.category === oldName ? { ...prod, category: newName } : prod
-      );
-      return {
-        categories: updatedCategories,
-        products: updatedProducts
-      };
-    });
-  },
-
-  deleteCategory: (name) => {
-    set(state => ({
-      categories: state.categories.filter(cat => cat !== name)
     }));
   },
 

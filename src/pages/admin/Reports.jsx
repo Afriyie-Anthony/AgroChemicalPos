@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useProductList } from '../../hooks/useProduct';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { 
   TrendingUp, 
@@ -33,7 +34,8 @@ import {
 } from 'recharts';
 
 export default function Reports() {
-  const { transactions, products, purchaseOrders, adjustments, expenses, staffList, customers } = useStore();
+  const { transactions, purchaseOrders, adjustments, expenses, staffList, customers } = useStore();
+  const { data: products = [] } = useProductList();
   const [activeTab, setActiveTab] = useState('financials'); 
   // Tabs: 'financials', 'tax', 'inventory', 'debtors', 'staff', 'movement'
   const [dateFilter, setDateFilter] = useState('all'); // 'all', 'today', 'week', 'month'
