@@ -3,6 +3,7 @@ import { useStore } from '../../store/useStore';
 import { formatCurrency } from '../../utils/formatters';
 import { useProductList } from '../../hooks/useProduct';
 import { useCategoryList } from '../../hooks/useCategory';
+import { useCustomers } from '../../hooks/useCustomers';
 import {
   Search,
   Trash2,
@@ -20,7 +21,7 @@ import {
 
 export default function PosTerminal() {
   const {
-    customers,
+
     cart,
     selectedCustomer,
     wholesaleMode,
@@ -38,6 +39,7 @@ export default function PosTerminal() {
     showAlert
   } = useStore();
 
+  const { data: customers = [] } = useCustomers();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   

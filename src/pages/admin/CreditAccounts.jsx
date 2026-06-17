@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useCustomers, useRecordRepayment } from '../../hooks/useCustomers';
+import { useTransactions } from '../../hooks/useTransactions';
 import { 
   CreditCard, 
   Search, 
@@ -16,7 +18,10 @@ import {
 } from 'lucide-react';
 
 export default function CreditAccounts() {
-  const { customers, transactions, recordCreditRepayment } = useStore();
+  const { showAlert } = useStore();
+  const { data: customers = [], isLoading: loadingCustomers } = useCustomers();
+  const { data: transactions = [], isLoading: loadingTransactions } = useTransactions({});
+  const { mutateAsync: recordRepaymentApi } = useRecordRepayment();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('highest-debt'); // 'highest-debt', 'lowest-debt', 'name'
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -64,19 +69,24 @@ export default function CreditAccounts() {
   // Get specific transactions ledger for a customer
   const customerLedger = useMemo(() => {
     if (!selectedCustomer) return [];
-    return transactions.filter(t => t.customer && t.customer.id === selectedCustomer.id);
+    return transactions.filter(t => t.customerId === selectedCustomer.id);
   }, [transactions, selectedCustomer]);
 
-  const handleRepaymentSubmit = (e) => {
+  const handleRepaymentSubmit = async (e) => {
     e.preventDefault();
     if (!selectedCustomer || !repayAmount) return;
     const amount = parseFloat(repayAmount);
     if (isNaN(amount) || amount <= 0) return;
 
-    recordCreditRepayment(selectedCustomer.id, amount);
-    setShowRepayModal(false);
-    setRepayAmount('');
-    setSelectedCustomer(null);
+    try {
+      await recordRepaymentApi({ id: selectedCustomer.id, data: { amount } });
+      showAlert('Repayment recorded successfully', 'success', 'Success');
+      setShowRepayModal(false);
+      setRepayAmount('');
+      setSelectedCustomer(null);
+    } catch (err) {
+      showAlert(err.response?.data?.message || 'Failed to record repayment', 'error', 'Error');
+    }
   };
 
   return (
@@ -162,7 +172,12 @@ export default function CreditAccounts() {
       </div>
 
       {/* Grid List of Debtors */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {loadingCustomers ? (
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {processedCustomers.map(cust => {
           const limitPercentage = cust.creditLimit > 0 ? (cust.outstandingCredit / cust.creditLimit) * 100 : 0;
           const isOverLimit = cust.outstandingCredit > cust.creditLimit;
@@ -256,6 +271,7 @@ export default function CreditAccounts() {
           );
         })}
       </div>
+      )}
 
       {/* Modal: Log Repayment */}
       {showRepayModal && selectedCustomer && (

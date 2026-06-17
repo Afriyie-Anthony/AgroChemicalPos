@@ -8,50 +8,6 @@ const INITIAL_EXPENSES = [
   { id: 'exp-4', description: 'Knapsack sprayer repair parts', category: 'Maintenance & Repairs', amount: 85.00, date: '2026-06-10', paidBy: 'Rita Asare', paymentMethod: 'momo', reference: 'MTN-8829371', notes: 'Spare nozzles and hoses' },
   { id: 'exp-5', description: 'Staff lunch allowance', category: 'Staff Welfare', amount: 120.00, date: '2026-06-12', paidBy: 'Kwame Asante', paymentMethod: 'cash', reference: '', notes: 'Weekly lunch allowance for 3 staff' },
 ];
-
-
-const INITIAL_CUSTOMERS = [
-  {
-    id: 'cust-1',
-    name: 'Kofi Mensah',
-    phone: '0244123456',
-    email: 'kofi.mensah@gmail.com',
-    location: 'Nsawam, Eastern Region',
-    gpsAddress: 'EN-023-4567',
-    segment: 'Smallholder Farmer',
-    creditLimit: 500.00,
-    outstandingCredit: 150.00,
-    loyaltyPoints: 120,
-    createdAt: '2025-01-15'
-  },
-  {
-    id: 'cust-2',
-    name: 'Amma Serwaa (Serwaa Farms)',
-    phone: '0207654321',
-    email: 'serwaafarms@yahoo.com',
-    location: 'Sunyani, Bono Region',
-    gpsAddress: 'BS-098-7654',
-    segment: 'Commercial Farmer',
-    creditLimit: 5000.00,
-    outstandingCredit: 1200.00,
-    loyaltyPoints: 850,
-    createdAt: '2025-02-10'
-  },
-  {
-    id: 'cust-3',
-    name: 'Yaw Boateng Agro-Chemicals',
-    phone: '0277987654',
-    email: 'yboatenghere@gmail.com',
-    location: 'Kumasi, Ashanti Region',
-    gpsAddress: 'AK-112-2233',
-    segment: 'Agro-Dealer',
-    creditLimit: 10000.00,
-    outstandingCredit: 0.00,
-    loyaltyPoints: 1500,
-    createdAt: '2025-03-01'
-  }
-];
-
 const MOCK_STAFF = [
   { id: 'staff-1', name: 'Kwame Asante', phone: '0551234567', email: 'kwame@agrochem.com', role: 'admin', password: 'admin123', status: 'active' },
   { id: 'staff-2', name: 'Rita Asare', phone: '0547654321', email: 'rita@agrochem.com', role: 'sales', password: 'sales123', status: 'active' }
@@ -158,48 +114,6 @@ export const useStore = create((set, get) => ({
     }));
   },
 
-
-
-  // CUSTOMER STATE
-  customers: INITIAL_CUSTOMERS,
-
-  addCustomer: (customer) => {
-    const newCust = {
-      ...customer,
-      id: `cust-${Date.now()}`,
-      outstandingCredit: 0.00,
-      loyaltyPoints: 0,
-      createdAt: new Date().toISOString().split('T')[0]
-    };
-    set(state => ({ customers: [...state.customers, newCust] }));
-    return newCust;
-  },
-
-  adjustCredit: (customerId, amountChange) => {
-    set(state => ({
-      customers: state.customers.map(c => {
-        if (c.id !== customerId) return c;
-        const newCredit = Number((c.outstandingCredit + amountChange).toFixed(2));
-        return { ...c, outstandingCredit: newCredit };
-      })
-    }));
-  },
-
-  recordCreditRepayment: (customerId, amount) => {
-    const cust = get().customers.find(c => c.id === customerId);
-    if (!cust) return { success: false, message: 'Customer not found' };
-
-    get().adjustCredit(customerId, -amount);
-    
-    // Simulate recording repayment under payment collections
-    return { success: true };
-  },
-
-  addLoyaltyPoints: (customerId, points) => {
-    set(state => ({
-      customers: state.customers.map(c => c.id === customerId ? { ...c, loyaltyPoints: c.loyaltyPoints + points } : c)
-    }));
-  },
 
   // STAFF MANAGEMENT
   addStaff: (staff) => {

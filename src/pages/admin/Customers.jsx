@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useCustomers, useCreateCustomer, useAdjustCredit } from '../../hooks/useCustomers';
 import { formatCurrency } from '../../utils/formatters';
 import {
   Plus,
@@ -15,7 +16,11 @@ import {
 } from 'lucide-react';
 
 export default function Customers() {
-  const { customers, addCustomer, adjustCredit } = useStore();
+  const { showAlert } = useStore();
+  const { data: customers = [], isLoading } = useCustomers();
+  const { mutateAsync: createCustomer } = useCreateCustomer();
+  const { mutateAsync: adjustCreditApi } = useAdjustCredit();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSegment, setSelectedSegment] = useState('All');
 
@@ -51,40 +56,50 @@ export default function Customers() {
     });
   }, [customers, searchQuery, selectedSegment]);
 
-  const handleAddSubmit = (e) => {
+  const handleAddSubmit = async (e) => {
     e.preventDefault();
     if (!newName || !newPhone) return;
 
-    addCustomer({
-      name: newName,
-      phone: newPhone,
-      email: newEmail || 'N/A',
-      location: newLocation || 'N/A',
-      gpsAddress: newGps || 'N/A',
-      segment: newSegment,
-      creditLimit: parseFloat(newLimit) || 500
-    });
+    try {
+      await createCustomer({
+        name: newName,
+        phone: newPhone,
+        email: newEmail || 'N/A',
+        location: newLocation || 'N/A',
+        gpsAddress: newGps || 'N/A',
+        segment: newSegment,
+        creditLimit: parseFloat(newLimit) || 500
+      });
 
-    setShowAddModal(false);
-    setNewName('');
-    setNewPhone('');
-    setNewEmail('');
-    setNewLocation('');
-    setNewGps('');
-    setNewLimit('500');
+      showAlert('Customer registered successfully!', 'success', 'Success');
+      setShowAddModal(false);
+      setNewName('');
+      setNewPhone('');
+      setNewEmail('');
+      setNewLocation('');
+      setNewGps('');
+      setNewLimit('500');
+    } catch (err) {
+      showAlert(err.response?.data?.message || 'Failed to register customer', 'error', 'Error');
+    }
   };
 
-  const handleCreditAdjustSubmit = (e) => {
+  const handleCreditAdjustSubmit = async (e) => {
     e.preventDefault();
     if (!activeCustomer || !creditAdjustment) return;
 
     const val = parseFloat(creditAdjustment);
     const amount = adjustDirection === 'increase' ? val : -val;
 
-    adjustCredit(activeCustomer.id, amount);
-    setShowCreditModal(false);
-    setActiveCustomer(null);
-    setCreditAdjustment('');
+    try {
+      await adjustCreditApi({ id: activeCustomer.id, data: { amountChange: amount } });
+      showAlert('Credit balance adjusted', 'success', 'Success');
+      setShowCreditModal(false);
+      setActiveCustomer(null);
+      setCreditAdjustment('');
+    } catch (err) {
+      showAlert(err.response?.data?.message || 'Failed to adjust credit', 'error', 'Error');
+    }
   };
 
   return (
@@ -150,10 +165,19 @@ export default function Customers() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {filteredCustomers.map(c => {
-                const creditUsed = c.outstandingCredit;
-                const creditPercent = Math.min(100, (creditUsed / c.creditLimit) * 100);
-                const isOverLimit = creditUsed >= c.creditLimit;
+              {isLoading ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-12 text-center">
+                    <div className="flex justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredCustomers.map(c => {
+                const creditUsed = Number(c.outstandingCredit);
+                const creditLimit = Number(c.creditLimit);
+                const creditPercent = Math.min(100, creditLimit > 0 ? (creditUsed / creditLimit) * 100 : 0);
+                const isOverLimit = creditUsed >= creditLimit;
 
                 return (
                   <tr key={c.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors text-xs">
