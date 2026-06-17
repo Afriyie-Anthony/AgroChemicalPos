@@ -521,7 +521,7 @@ export default function Expenses() {
               Showing {filteredExpenses.length} of {expenses.length} expenses
             </span>
             <span className="text-sm font-bold text-slate-800 dark:text-white">
-              Total: GHS {filteredExpenses.reduce((sum, e) => sum + e.amount, 0).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+              Total: GHS {filteredExpenses.reduce((sum, e) => sum + Number(e.amount), 0).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
             </span>
           </div>
         )}

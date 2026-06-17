@@ -205,7 +205,7 @@ export default function Inventory() {
                   </td>
                 </tr>
               ) : filteredProducts.map((p) => {
-                const totalStock = p.batches.reduce((sum, b) => sum + b.quantity, 0);
+                const totalStock = p.batches.reduce((sum, b) => sum + Number(b.quantity), 0);
                 const isLowStock = totalStock <= p.reorderLevel;
 
                 return (

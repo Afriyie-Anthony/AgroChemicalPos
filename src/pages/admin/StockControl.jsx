@@ -40,7 +40,7 @@ export default function StockControl() {
 
   const lowStockProducts = useMemo(() => {
     return products.filter(p => {
-      const totalQty = p.batches.reduce((sum, b) => sum + b.quantity, 0);
+      const totalQty = p.batches.reduce((sum, b) => sum + Number(b.quantity), 0);
       return totalQty <= p.reorderLevel;
     });
   }, [products]);
@@ -314,7 +314,7 @@ export default function StockControl() {
             ) : (
               <div className="divide-y divide-slate-100 dark:divide-slate-850">
                 {lowStockProducts.map(p => {
-                  const qty = p.batches.reduce((sum, b) => sum + b.quantity, 0);
+                  const qty = p.batches.reduce((sum, b) => sum + Number(b.quantity), 0);
                   return (
                     <div key={p.id} className="py-2.5 flex justify-between items-center text-xs">
                       <div>

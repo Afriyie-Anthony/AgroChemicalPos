@@ -82,16 +82,16 @@ export default function AdminDashboard() {
   // Compute overall stats dynamically from filtered timeframe data
   const dashboardStats = useMemo(() => {
     // 1. Sales Calculation
-    const totalSales = filteredTransactions.reduce((acc, curr) => acc + curr.total, 0);
+    const totalSales = filteredTransactions.reduce((acc, curr) => acc + Number(curr.total), 0);
     const salesCount = filteredTransactions.length;
 
     // 2. Outstanding Credit (Remains overall aggregate)
-    const totalOutstandingCredit = customers.reduce((acc, curr) => acc + curr.outstandingCredit, 0);
+    const totalOutstandingCredit = customers.reduce((acc, curr) => acc + Number(curr.outstandingCredit), 0);
 
     // 3. Low Stock Check (Overall aggregate)
     let lowStockCount = 0;
     products.forEach(p => {
-      const totalQty = p.batches.reduce((sum, b) => sum + b.quantity, 0);
+      const totalQty = p.batches.reduce((sum, b) => sum + Number(b.quantity), 0);
       if (totalQty <= p.reorderLevel) {
         lowStockCount++;
       }
@@ -138,7 +138,7 @@ export default function AdminDashboard() {
     });
 
     const grossProfit = totalSales - totalCogs;
-    const totalExpenses = filteredExpenses.reduce((acc, curr) => acc + curr.amount, 0);
+    const totalExpenses = filteredExpenses.reduce((acc, curr) => acc + Number(curr.amount), 0);
     const netProfit = grossProfit - totalExpenses;
 
     return {
@@ -192,7 +192,7 @@ export default function AdminDashboard() {
   const criticalProducts = useMemo(() => {
     return products
       .map(p => {
-        const totalQty = p.batches.reduce((sum, b) => sum + b.quantity, 0);
+        const totalQty = p.batches.reduce((sum, b) => sum + Number(b.quantity), 0);
         return { ...p, totalQty };
       })
       .filter(p => p.totalQty <= p.reorderLevel)

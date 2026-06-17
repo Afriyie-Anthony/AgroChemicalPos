@@ -264,7 +264,7 @@ export default function PosTerminal() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {filteredProducts.map(p => {
-                const totalStock = p.batches.reduce((sum, b) => sum + b.quantity, 0);
+                const totalStock = p.batches.reduce((sum, b) => sum + Number(b.quantity), 0);
                 const showPrice = wholesaleMode ? p.wholesalePrice : p.retailPrice;
                 const isOutOfStock = totalStock <= 0;
 

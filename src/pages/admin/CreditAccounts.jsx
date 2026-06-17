@@ -28,9 +28,9 @@ export default function CreditAccounts() {
   // Stats Calculations
   const stats = useMemo(() => {
     const debtors = customers.filter(c => c.outstandingCredit > 0);
-    const totalOutstanding = debtors.reduce((sum, c) => sum + c.outstandingCredit, 0);
+    const totalOutstanding = debtors.reduce((sum, c) => sum + Number(c.outstandingCredit), 0);
     const avgDebt = debtors.length > 0 ? totalOutstanding / debtors.length : 0;
-    const totalCreditLimits = customers.reduce((sum, c) => sum + c.creditLimit, 0);
+    const totalCreditLimits = customers.reduce((sum, c) => sum + Number(c.creditLimit), 0);
     const riskExposurePercentage = totalCreditLimits > 0 ? (totalOutstanding / totalCreditLimits) * 100 : 0;
 
     return {

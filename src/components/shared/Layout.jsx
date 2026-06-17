@@ -46,7 +46,7 @@ export default function Layout({ children }) {
   // Dynamic Badge Calculations
   const lowStockCount = useMemo(() => {
     return products.filter(p => {
-      const totalQty = p.batches.reduce((sum, b) => sum + b.quantity, 0);
+      const totalQty = p.batches.reduce((sum, b) => sum + Number(b.quantity), 0);
       return totalQty <= p.reorderLevel;
     }).length;
   }, [products]);

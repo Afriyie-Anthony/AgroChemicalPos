@@ -125,7 +125,7 @@ export default function Reports() {
 
   // Expenses summary
   const expensesTotal = useMemo(() => {
-    return filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+    return filteredExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
   }, [filteredExpenses]);
 
   const netProfit = financialData.grossProfit - expensesTotal;
@@ -166,7 +166,7 @@ export default function Reports() {
     let lowStockCount = 0;
 
     products.forEach(p => {
-      const prodQty = p.batches.reduce((sum, b) => sum + b.quantity, 0);
+      const prodQty = p.batches.reduce((sum, b) => sum + Number(b.quantity), 0);
       totalQty += prodQty;
 
       if (prodQty <= p.reorderLevel) {
@@ -206,7 +206,7 @@ export default function Reports() {
     // Filter low stock
     const lowStockItems = products
       .map(p => {
-        const qty = p.batches.reduce((sum, b) => sum + b.quantity, 0);
+        const qty = p.batches.reduce((sum, b) => sum + Number(b.quantity), 0);
         return { ...p, currentQty: qty };
       })
       .filter(p => p.currentQty <= p.reorderLevel);
@@ -246,8 +246,8 @@ export default function Reports() {
   // ==========================================
   const debtorsData = useMemo(() => {
     const activeDebtors = customers.filter(c => c.outstandingCredit > 0);
-    const totalOutstanding = activeDebtors.reduce((sum, c) => sum + c.outstandingCredit, 0);
-    const totalLimitPool = customers.reduce((sum, c) => sum + c.creditLimit, 0);
+    const totalOutstanding = activeDebtors.reduce((sum, c) => sum + Number(c.outstandingCredit), 0);
+    const totalLimitPool = customers.reduce((sum, c) => sum + Number(c.creditLimit), 0);
     const bufferAvailable = totalLimitPool - totalOutstanding;
 
     return {
@@ -277,7 +277,7 @@ export default function Reports() {
     return staffList.map(staff => {
       const staffTrx = filteredTransactions.filter(t => t.cashierId === staff.id);
       const salesCount = staffTrx.length;
-      const totalRevenue = staffTrx.reduce((sum, t) => sum + t.total, 0);
+      const totalRevenue = staffTrx.reduce((sum, t) => sum + Number(t.total), 0);
 
       return {
         id: staff.id,
@@ -399,7 +399,7 @@ export default function Reports() {
     } else if (activeTab === 'inventory') {
       headers = ['Product Name', 'Remaining Stock', 'Reorder Level', 'Status'];
       rows = products.map(p => {
-        const qty = p.batches.reduce((sum, b) => sum + b.quantity, 0);
+        const qty = p.batches.reduce((sum, b) => sum + Number(b.quantity), 0);
         return [
           p.name,
           qty,
