@@ -32,7 +32,7 @@ export default function CreditAccounts() {
 
   // Stats Calculations
   const stats = useMemo(() => {
-    const debtors = customers.filter(c => c.outstandingCredit > 0);
+    const debtors = customers.filter(c => Number(c.outstandingCredit) > 0);
     const totalOutstanding = debtors.reduce((sum, c) => sum + Number(c.outstandingCredit), 0);
     const avgDebt = debtors.length > 0 ? totalOutstanding / debtors.length : 0;
     const totalCreditLimits = customers.reduce((sum, c) => sum + Number(c.creditLimit), 0);
@@ -56,10 +56,12 @@ export default function CreditAccounts() {
         return matchesSearch;
       })
       .sort((a, b) => {
+        const debtA = Number(a.outstandingCredit);
+        const debtB = Number(b.outstandingCredit);
         if (sortOrder === 'highest-debt') {
-          return b.outstandingCredit - a.outstandingCredit;
+          return debtB - debtA;
         } else if (sortOrder === 'lowest-debt') {
-          return a.outstandingCredit - b.outstandingCredit;
+          return debtA - debtB;
         } else {
           return a.name.localeCompare(b.name);
         }
