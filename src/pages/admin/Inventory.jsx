@@ -3,7 +3,7 @@ import { useStore } from '../../store/useStore';
 import { useProductList, useCreateProduct, useAdjustStock } from '../../hooks/useProduct';
 import { useCategoryList } from '../../hooks/useCategory';
 import { formatCurrency, formatDate } from '../../utils/formatters';
-import { Plus, X, AlertTriangle, FileSpreadsheet, Package, Layers, Info } from 'lucide-react';
+import { Plus, X, AlertTriangle, FileSpreadsheet, Package, Layers, Info, Search } from 'lucide-react';
 
 export default function Inventory() {
   const { showAlert } = useStore();
@@ -14,6 +14,7 @@ export default function Inventory() {
   const { mutate: createProductApi, isPending: isCreating } = useCreateProduct();
   const { mutate: adjustStockApi, isPending: isAdjusting } = useAdjustStock();
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Modals/Drawers toggle state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -44,9 +45,20 @@ export default function Inventory() {
   const categoriesList = useMemo(() => ['All', ...categories], [categories]);
 
   const filteredProducts = useMemo(() => {
-    if (selectedCategory === 'All') return products;
-    return products.filter(p => p.category === selectedCategory);
-  }, [products, selectedCategory]);
+    let result = products;
+    if (selectedCategory !== 'All') {
+      result = result.filter(p => p.category === selectedCategory);
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(p => 
+        p.name.toLowerCase().includes(q) || 
+        (p.brand && p.brand.toLowerCase().includes(q)) ||
+        (p.barcode && p.barcode.toLowerCase().includes(q))
+      );
+    }
+    return result;
+  }, [products, selectedCategory, searchQuery]);
 
   const handleAddProductSubmit = (e) => {
     e.preventDefault();
@@ -136,8 +148,23 @@ export default function Inventory() {
         </button>
       </div>
 
-      {/* Category Pills Slider */}
-      <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800 scrollbar-track-transparent">
+      {/* Filters Area */}
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div className="w-full sm:max-w-xs relative">
+          <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 dark:text-slate-500">
+            <Search className="w-4 h-4" />
+          </span>
+          <input
+            type="text"
+            placeholder="Search products, brands, or barcode..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-850 dark:text-slate-200 focus:outline-none focus:border-emerald-500 shadow-sm"
+          />
+        </div>
+
+        {/* Category Pills Slider */}
+        <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800 scrollbar-track-transparent w-full sm:w-auto">
         {categoriesList.map((cat) => (
           <button
             key={cat}
@@ -151,6 +178,7 @@ export default function Inventory() {
             {cat}
           </button>
         ))}
+        </div>
       </div>
 
       {/* Main Inventory List */}

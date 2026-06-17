@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { AlertTriangle, Boxes, Check, Clipboard, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Boxes, Check, Clipboard, RefreshCw, Search } from 'lucide-react';
 import { useProductList, useAdjustStock } from '../../hooks/useProduct';
+import { useCategoryList } from '../../hooks/useCategory';
 import { useStore } from '../../store/useStore';
 
 export default function StockControl() {
@@ -12,8 +13,30 @@ export default function StockControl() {
   const [adjustQty, setAdjustQty] = useState('');
   const [adjustReason, setAdjustReason] = useState('count correction');
   
+  // Filters
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const { data: categoriesData = [] } = useCategoryList();
+  const categoriesList = useMemo(() => ['All', ...categoriesData.map(c => c.name)], [categoriesData]);
+
   // Worksheet counting audit state
   const [auditQuantities, setAuditQuantities] = useState({});
+
+  const filteredProducts = useMemo(() => {
+    let result = products;
+    if (selectedCategory !== 'All') {
+      result = result.filter(p => p.category === selectedCategory);
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(p => 
+        p.name.toLowerCase().includes(q) || 
+        (p.brand && p.brand.toLowerCase().includes(q)) ||
+        (p.barcode && p.barcode.toLowerCase().includes(q))
+      );
+    }
+    return result;
+  }, [products, selectedCategory, searchQuery]);
 
   const lowStockProducts = useMemo(() => {
     return products.filter(p => {
@@ -104,8 +127,40 @@ export default function StockControl() {
               <span>Physical Stock Count Audit Sheet</span>
             </h3>
 
+            {/* Filters Area */}
+            <div className="flex flex-col space-y-3 mb-4">
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 dark:text-slate-500">
+                  <Search className="w-4 h-4" />
+                </span>
+                <input
+                  type="text"
+                  placeholder="Search products to audit..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-850 dark:text-slate-200 focus:outline-none focus:border-emerald-500 shadow-sm"
+                />
+              </div>
+
+              <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800 scrollbar-track-transparent">
+                {categoriesList.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-3 py-1.5 text-[10px] font-bold rounded-xl whitespace-nowrap border transition-all ${
+                      selectedCategory === cat
+                        ? 'bg-slate-800 dark:bg-slate-100 text-slate-100 dark:text-slate-950 border-slate-800 dark:border-slate-100 shadow-md'
+                        : 'bg-white dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="divide-y divide-slate-100 dark:divide-slate-850 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
-              {products.map(p => (
+              {filteredProducts.map(p => (
                 <div key={p.id} className="py-4 space-y-3">
                   <div className="flex justify-between items-start">
                     <div>
