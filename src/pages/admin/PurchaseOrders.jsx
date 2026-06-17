@@ -9,6 +9,7 @@ import { ClipboardList, Plus, Truck, CheckCircle2, ChevronRight, X } from 'lucid
 export default function PurchaseOrders() {
   const { data: purchaseOrders = [], isLoading } = usePurchaseOrderList();
   const { data: suppliers = [] } = useSupplierList();
+  const { showAlert } = useStore();
   const { mutate: createPoApi, isPending: isCreating } = useCreatePurchaseOrder();
   const { mutate: receivePoApi, isPending: isReceiving } = useReceivePurchaseOrder();
   const { data: products = [] } = useProductList();
@@ -57,7 +58,7 @@ export default function PurchaseOrders() {
   const handleCreatePOSubmit = (e) => {
     e.preventDefault();
     if (!selectedSupplierId || poItems.some(it => !it.productId)) {
-      alert('Please select a supplier and add at least one valid product.');
+      showAlert('Please select a supplier and add at least one valid product.', 'error', 'Invalid Order');
       return;
     }
 
@@ -110,7 +111,7 @@ export default function PurchaseOrders() {
     const receivedArray = Object.keys(receivedBatches).map(key => receivedBatches[key]);
     
     if (receivedArray.some(it => !it.batchNumber || it.quantity <= 0)) {
-      alert('Please enter valid batch numbers and quantities for all received items.');
+      showAlert('Please enter valid batch numbers and quantities for all received items.', 'error', 'Invalid GRN Data');
       return;
     }
 

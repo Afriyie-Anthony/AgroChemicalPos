@@ -6,6 +6,7 @@ import { formatCurrency, formatDate } from '../../utils/formatters';
 import { Plus, X, AlertTriangle, FileSpreadsheet, Package, Layers, Info } from 'lucide-react';
 
 export default function Inventory() {
+  const { showAlert } = useStore();
   const { data: products = [], isLoading } = useProductList();
   const { data: categoriesData = [] } = useCategoryList();
   const categories = categoriesData.map(c => c.name);
@@ -50,7 +51,7 @@ export default function Inventory() {
   const handleAddProductSubmit = (e) => {
     e.preventDefault();
     if (!newProd.name || !newProd.retailPrice || !newProd.batchNumber || !newProd.batchQty) {
-      alert('Please fill in required fields: Name, Retail Price, Batch Number, and Batch Quantity.');
+      showAlert('Please fill in required fields: Name, Retail Price, Batch Number, and Batch Quantity.', 'error', 'Missing Fields');
       return;
     }
 

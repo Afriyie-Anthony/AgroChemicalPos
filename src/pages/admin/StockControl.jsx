@@ -1,9 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { useStore } from '../../store/useStore';
 import { AlertTriangle, Boxes, Check, Clipboard, RefreshCw } from 'lucide-react';
+import { useProductList, useAdjustStock } from '../../hooks/useProduct';
+import { useStore } from '../../store/useStore';
 
 export default function StockControl() {
-  const { products, adjustStock } = useStore();
+  const { showAlert } = useStore();
+  const { data: products = [], isLoading } = useProductList();
+  const { mutate: adjustStockApi, isPending: isAdjusting } = useAdjustStock();
   const [selectedProduct, setSelectedProduct] = useState('');
   const [selectedBatch, setSelectedBatch] = useState('');
   const [adjustQty, setAdjustQty] = useState('');
@@ -20,8 +23,8 @@ export default function StockControl() {
   }, [products]);
 
   const activeBatches = useMemo(() => {
-    const prod = products.find(p => p.id === selectedProduct);
-    return prod ? prod.batches : [];
+    const prod = products.find(p => String(p.id) === String(selectedProduct));
+    return prod && prod.batches ? prod.batches : [];
   }, [selectedProduct, products]);
 
   const handleAdjustSubmit = (e) => {
@@ -29,13 +32,16 @@ export default function StockControl() {
     if (!selectedProduct || !selectedBatch || !adjustQty) return;
 
     const qty = parseFloat(adjustQty);
-    adjustStock(selectedProduct, selectedBatch, qty, adjustReason);
-    alert('Stock adjusted successfully');
-    
-    // Reset inputs
-    setAdjustQty('');
-    setSelectedProduct('');
-    setSelectedBatch('');
+    adjustStockApi({ 
+      id: selectedProduct, 
+      data: { batchId: selectedBatch, quantityChange: qty, reason: adjustReason } 
+    }, {
+      onSuccess: () => {
+        setAdjustQty('');
+        setSelectedProduct('');
+        setSelectedBatch('');
+      }
+    });
   };
 
   const handleAuditChange = (prodId, batchId, value) => {
@@ -49,24 +55,29 @@ export default function StockControl() {
     const key = `${product.id}-${batch.id}`;
     const counted = parseFloat(auditQuantities[key]);
     if (isNaN(counted) || counted < 0) {
-      alert('Please enter a valid counted quantity');
+      showAlert('Please enter a valid counted quantity', 'error', 'Invalid Input');
       return;
     }
 
     const variance = counted - batch.quantity;
     if (variance === 0) {
-      alert('Count matches current stock, no adjustments needed.');
+      showAlert('Count matches current stock, no adjustments needed.', 'info', 'No Variance');
       return;
     }
 
-    adjustStock(product.id, batch.id, variance, 'count correction');
-    alert(`Applied correction: ${variance > 0 ? '+' : ''}${variance} units. Count matches physical record now.`);
-    
-    // Clear audit input
-    setAuditQuantities(prev => {
-      const copy = { ...prev };
-      delete copy[key];
-      return copy;
+    adjustStockApi({
+      id: product.id,
+      data: { batchId: batch.id, quantityChange: variance, reason: 'count correction' }
+    }, {
+      onSuccess: () => {
+        showAlert(`Applied correction: ${variance > 0 ? '+' : ''}${variance} units. Count matches physical record now.`, 'success', 'Audit Complete');
+        // Clear audit input
+        setAuditQuantities(prev => {
+          const copy = { ...prev };
+          delete copy[key];
+          return copy;
+        });
+      }
     });
   };
 
@@ -79,7 +90,13 @@ export default function StockControl() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Stock take sheet / audit tool */}
+        {isLoading ? (
+          <div className="lg:col-span-3 flex justify-center py-20">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
+          </div>
+        ) : (
+          <>
+            {/* Stock take sheet / audit tool */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
             <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200 mb-4 flex items-center space-x-1.5">
@@ -122,12 +139,13 @@ export default function StockControl() {
                               className="w-full px-2 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
                             />
                             {countedValue !== '' && (
-                              <button
-                                onClick={() => handleApplyAuditAdjust(p, b)}
-                                className="px-2 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-lg hover:scale-105 transition-all focus:outline-none"
-                              >
-                                <Check className="w-3.5 h-3.5" />
-                              </button>
+                                <button
+                                  disabled={isAdjusting}
+                                  onClick={() => handleApplyAuditAdjust(p, b)}
+                                  className="px-2 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-lg hover:scale-105 transition-all focus:outline-none disabled:opacity-50"
+                                >
+                                  <Check className="w-3.5 h-3.5" />
+                                </button>
                             )}
                           </div>
 
@@ -218,9 +236,11 @@ export default function StockControl() {
 
               <button
                 type="submit"
-                className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow transition-all active:scale-98"
+                disabled={isAdjusting}
+                className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow transition-all active:scale-98 disabled:opacity-60 flex justify-center items-center space-x-2"
               >
-                Apply Adjustment
+                {isAdjusting && <div className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>}
+                <span>Apply Adjustment</span>
               </button>
             </form>
           </div>
@@ -256,6 +276,8 @@ export default function StockControl() {
             )}
           </div>
         </div>
+        </>
+      )}
       </div>
     </div>
   );

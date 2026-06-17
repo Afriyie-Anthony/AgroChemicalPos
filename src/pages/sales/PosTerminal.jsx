@@ -34,7 +34,8 @@ export default function PosTerminal() {
     holdCart,
     resumeCart,
     addCustomer,
-    checkout
+    checkout,
+    showAlert
   } = useStore();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,7 +98,7 @@ export default function PosTerminal() {
       .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
 
     if (availableBatches.length === 0) {
-      alert('Product is out of stock in all batches.');
+      showAlert('Product is out of stock in all batches.', 'error', 'Out of Stock');
       return;
     }
 

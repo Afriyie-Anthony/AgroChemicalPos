@@ -129,15 +129,10 @@ export const useStore = create((set, get) => ({
   setCurrentUser: (user) => set({ currentUser: user, isAuthenticated: true }),
   clearCurrentUser: () => set({ currentUser: null, isAuthenticated: false }),
 
-  // INVENTORY STATE
-  products: [], // Kept temporarily so components don't crash while refactoring
 
-  adjustments: [],
 
   expenses: INITIAL_EXPENSES,
   expenseCategories: ['Utilities', 'Transport & Logistics', 'Rent', 'Maintenance & Repairs', 'Staff Welfare', 'Marketing & Advertising', 'Office Supplies', 'Insurance', 'Taxes & Levies', 'Miscellaneous'],
-
-
 
 
 

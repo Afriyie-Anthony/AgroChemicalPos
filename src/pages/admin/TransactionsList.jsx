@@ -4,7 +4,7 @@ import { formatCurrency, formatDateTime } from '../../utils/formatters';
 import { Receipt, Search, Eye, AlertCircle, X, ShieldAlert, Check, Printer } from 'lucide-react';
 
 export default function TransactionsList() {
-  const { transactions, voidTransaction } = useStore();
+  const { transactions, voidTransaction, showAlert } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMethod, setSelectedMethod] = useState('All');
   
@@ -32,14 +32,14 @@ export default function TransactionsList() {
 
     const res = voidTransaction(activeTrx.id, voidReason);
     if (res.success) {
-      alert('Transaction successfully voided. Stock returned to inventory.');
+      showAlert('Transaction successfully voided. Stock returned to inventory.', 'success', 'Transaction Voided');
       // Refresh local modal state
       const updated = transactions.find(t => t.id === activeTrx.id);
       setActiveTrx(updated);
       setShowVoidDialog(false);
       setVoidReason('');
     } else {
-      alert(res.message || 'Failed to void transaction');
+      showAlert(res.message || 'Failed to void transaction', 'error', 'Error');
     }
   };
 
