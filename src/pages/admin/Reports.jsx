@@ -3,6 +3,7 @@ import { useStore } from '../../store/useStore';
 import { useProductList } from '../../hooks/useProduct';
 import { usePurchaseOrderList } from '../../hooks/usePurchaseOrder';
 import { useCustomers } from '../../hooks/useCustomers';
+import { useExpenses } from '../../hooks/useExpenses';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { 
   TrendingUp, 
@@ -36,10 +37,11 @@ import {
 } from 'recharts';
 
 export default function Reports() {
-  const { transactions, adjustments, expenses, staffList } = useStore();
+  const { transactions, adjustments, staffList } = useStore();
   const { data: products = [] } = useProductList();
   const { data: purchaseOrders = [] } = usePurchaseOrderList();
   const { data: customers = [] } = useCustomers();
+  const { data: expenses = [] } = useExpenses({});
   const [activeTab, setActiveTab] = useState('financials'); 
   // Tabs: 'financials', 'tax', 'inventory', 'debtors', 'staff', 'movement'
   const [dateFilter, setDateFilter] = useState('all'); // 'all', 'today', 'week', 'month'
@@ -147,7 +149,7 @@ export default function Reports() {
   const expensesPieData = useMemo(() => {
     const cats = {};
     filteredExpenses.forEach(e => {
-      cats[e.category] = (cats[e.category] || 0) + e.amount;
+      cats[e.category] = (cats[e.category] || 0) + Number(e.amount);
     });
     const colors = ['#10b981', '#3b82f6', '#f43f5e', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6'];
     return Object.entries(cats).map(([name, value], i) => ({

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { useProductList } from '../../hooks/useProduct';
 import { useCustomers } from '../../hooks/useCustomers';
+import { useExpenses } from '../../hooks/useExpenses';
 import { formatCurrency } from '../../utils/formatters';
 import {
   AlertTriangle,
@@ -33,9 +34,10 @@ import TopProductsChart from '../../components/dashboard/admin/TopProductsChart'
 import CategoryDistributionChart from '../../components/dashboard/admin/CategoryDistributionChart';
 
 export default function AdminDashboard() {
-  const { transactions, expenses, currentUser } = useStore();
+  const { transactions, currentUser } = useStore();
   const { data: products = [] } = useProductList();
   const { data: customers = [] } = useCustomers();
+  const { data: expenses = [] } = useExpenses({});
   const [timeFilter, setTimeFilter] = useState('day'); // 'day', 'month', 'year'
   const isAdmin = currentUser?.role === 'admin';
 
@@ -171,7 +173,7 @@ export default function AdminDashboard() {
   const expensesPieData = useMemo(() => {
     const cats = {};
     filteredExpenses.forEach(e => {
-      cats[e.category] = (cats[e.category] || 0) + e.amount;
+      cats[e.category] = (cats[e.category] || 0) + Number(e.amount);
     });
     const colors = ['#10b981', '#3b82f6', '#f43f5e', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6'];
     return Object.entries(cats).map(([name, value], i) => ({

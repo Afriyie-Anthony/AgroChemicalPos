@@ -21,6 +21,12 @@ import {
   ArrowUpDown,
   ChevronDown
 } from 'lucide-react';
+import { 
+  useExpenses, 
+  useCreateExpense, 
+  useUpdateExpense, 
+  useDeleteExpense 
+} from '../../hooks/useExpenses';
 
 const PAYMENT_METHOD_LABELS = {
   cash: 'Cash',
@@ -37,7 +43,11 @@ const PAYMENT_METHOD_ICONS = {
 };
 
 export default function Expenses() {
-  const { expenses, expenseCategories, addExpense, updateExpense, deleteExpense, currentUser, staffList } = useStore();
+  const { expenseCategories, currentUser, staffList, showAlert } = useStore();
+  const { data: expenses = [], isLoading } = useExpenses({});
+  const { mutateAsync: createExpenseApi } = useCreateExpense();
+  const { mutateAsync: updateExpenseApi } = useUpdateExpense();
+  const { mutateAsync: deleteExpenseApi } = useDeleteExpense();
 
   // UI State
   const [searchQuery, setSearchQuery] = useState('');
@@ -108,8 +118,8 @@ export default function Expenses() {
         valA = new Date(a.date);
         valB = new Date(b.date);
       } else if (sortField === 'amount') {
-        valA = a.amount;
-        valB = b.amount;
+        valA = Number(a.amount);
+        valB = Number(b.amount);
       } else if (sortField === 'category') {
         valA = a.category;
         valB = b.category;
@@ -138,13 +148,14 @@ export default function Expenses() {
     const categoryTotals = {};
 
     expenses.forEach(e => {
-      totalAll += e.amount;
+      const amount = Number(e.amount);
+      totalAll += amount;
       const d = new Date(e.date);
       const mKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      if (mKey === thisMonth) totalThisMonth += e.amount;
-      if (mKey === lastMonth) totalLastMonth += e.amount;
+      if (mKey === thisMonth) totalThisMonth += amount;
+      if (mKey === lastMonth) totalLastMonth += amount;
 
-      categoryTotals[e.category] = (categoryTotals[e.category] || 0) + e.amount;
+      categoryTotals[e.category] = (categoryTotals[e.category] || 0) + amount;
     });
 
     const topCategory = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0];
@@ -203,29 +214,40 @@ export default function Expenses() {
     setShowDeleteModal(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
       ...formData,
       amount: parseFloat(formData.amount)
     };
 
-    if (editingExpense) {
-      updateExpense(editingExpense.id, payload);
-    } else {
-      addExpense(payload);
+    try {
+      if (editingExpense) {
+        await updateExpenseApi({ id: editingExpense.id, data: payload });
+        showAlert('Expense updated successfully', 'success', 'Success');
+      } else {
+        await createExpenseApi(payload);
+        showAlert('Expense recorded successfully', 'success', 'Success');
+      }
+      setShowAddModal(false);
+      setEditingExpense(null);
+      setFormData(emptyForm);
+    } catch (error) {
+      showAlert(error.response?.data?.message || 'Failed to save expense', 'error', 'Error');
     }
-    setShowAddModal(false);
-    setEditingExpense(null);
-    setFormData(emptyForm);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (selectedExpense) {
-      deleteExpense(selectedExpense.id);
+      try {
+        await deleteExpenseApi(selectedExpense.id);
+        showAlert('Expense deleted successfully', 'success', 'Success');
+        setShowDeleteModal(false);
+        setSelectedExpense(null);
+      } catch (error) {
+        showAlert(error.response?.data?.message || 'Failed to delete expense', 'error', 'Error');
+      }
     }
-    setShowDeleteModal(false);
-    setSelectedExpense(null);
   };
 
   const formatDate = (dateStr) => {
@@ -434,7 +456,15 @@ export default function Expenses() {
               </tr>
             </thead>
             <tbody>
-              {filteredExpenses.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-16">
+                    <div className="flex justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredExpenses.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center py-16">
                     <div className="flex flex-col items-center gap-3 text-slate-400 dark:text-slate-500">
@@ -467,7 +497,7 @@ export default function Expenses() {
                       </td>
                       <td className="text-right">
                         <span className="text-sm font-bold text-slate-800 dark:text-white">
-                          GHS {expense.amount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                          GHS {Number(expense.amount).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
                         </span>
                       </td>
                       <td>
@@ -705,7 +735,7 @@ export default function Expenses() {
               {/* Amount Highlight */}
               <div className="text-center py-4 bg-gradient-to-br from-rose-50 to-orange-50 dark:from-rose-500/5 dark:to-orange-500/5 rounded-xl border border-rose-200/50 dark:border-rose-500/10">
                 <p className="text-xs font-semibold text-rose-500 uppercase tracking-wider mb-1">Amount</p>
-                <p className="text-3xl font-bold text-slate-800 dark:text-white">GHS {selectedExpense.amount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}</p>
+                <p className="text-3xl font-bold text-slate-800 dark:text-white">GHS {Number(selectedExpense.amount).toLocaleString('en-GH', { minimumFractionDigits: 2 })}</p>
               </div>
 
               {/* Info Grid */}
@@ -771,7 +801,7 @@ export default function Expenses() {
               <div>
                 <h3 className="text-lg font-bold text-slate-800 dark:text-white">Delete Expense?</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  This will permanently remove <strong className="text-slate-700 dark:text-slate-300">"{selectedExpense.description}"</strong> (GHS {selectedExpense.amount.toFixed(2)}).
+                  This will permanently remove <strong className="text-slate-700 dark:text-slate-300">"{selectedExpense.description}"</strong> (GHS {Number(selectedExpense.amount).toFixed(2)}).
                 </p>
               </div>
               <div className="flex items-center gap-3 pt-2">
