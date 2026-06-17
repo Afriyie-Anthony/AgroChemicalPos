@@ -27,6 +27,7 @@ import {
   useUpdateExpense, 
   useDeleteExpense 
 } from '../../hooks/useExpenses';
+import { useStaffList } from '../../hooks/useStaff';
 
 const PAYMENT_METHOD_LABELS = {
   cash: 'Cash',
@@ -43,8 +44,9 @@ const PAYMENT_METHOD_ICONS = {
 };
 
 export default function Expenses() {
-  const { expenseCategories, currentUser, staffList, showAlert } = useStore();
+  const { expenseCategories, currentUser, showAlert } = useStore();
   const { data: expenses = [], isLoading } = useExpenses({});
+  const { data: staffList = [] } = useStaffList();
   const { mutateAsync: createExpenseApi } = useCreateExpense();
   const { mutateAsync: updateExpenseApi } = useUpdateExpense();
   const { mutateAsync: deleteExpenseApi } = useDeleteExpense();

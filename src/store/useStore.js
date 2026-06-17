@@ -83,6 +83,7 @@ export const useStore = create((set, get) => ({
             expiryDate: batch.expiryDate,
             price: itemPrice,
             quantity: allocatedFromBatch,
+            maxQuantity: batch.quantity,
             discount: 0,
             taxExempt: product.category === 'Farm Tools & Equipment'
           });
@@ -105,14 +106,10 @@ export const useStore = create((set, get) => ({
   },
 
   updateCartQty: (productId, batchId, quantity) => {
-    const product = get().products.find(p => p.id === productId);
-    const batch = product?.batches.find(b => b.id === batchId);
-    if (!batch) return;
-
     set(state => ({
       cart: state.cart.map(item => {
         if (item.productId === productId && item.batchId === batchId) {
-          const clampedQty = Math.max(0.01, Math.min(quantity, batch.quantity));
+          const clampedQty = Math.max(0.01, Math.min(quantity, item.maxQuantity || 99999));
           return { ...item, quantity: clampedQty };
         }
         return item;

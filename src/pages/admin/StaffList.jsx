@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { useStaffList, useCreateStaff, useUpdateStaff } from '../../hooks/useStaff';
+import { useTransactions } from '../../hooks/useTransactions';
 import { 
   UserCheck, 
   Plus, 
@@ -17,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export default function StaffList() {
-  const { transactions } = useStore();
+  const { data: transactions = [] } = useTransactions({});
   const { data: staffList = [], isLoading } = useStaffList();
   const { mutate: createStaff, isPending: isCreating } = useCreateStaff();
   const { mutate: updateStaffApi, isPending: isUpdating } = useUpdateStaff();
