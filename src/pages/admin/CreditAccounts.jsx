@@ -179,14 +179,16 @@ export default function CreditAccounts() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {processedCustomers.map(cust => {
-          const limitPercentage = cust.creditLimit > 0 ? (cust.outstandingCredit / cust.creditLimit) * 100 : 0;
-          const isOverLimit = cust.outstandingCredit > cust.creditLimit;
+          const outstandingCredit = Number(cust.outstandingCredit);
+          const creditLimit = Number(cust.creditLimit);
+          const limitPercentage = creditLimit > 0 ? (outstandingCredit / creditLimit) * 100 : 0;
+          const isOverLimit = outstandingCredit > creditLimit;
 
           return (
             <div 
               key={cust.id} 
               className={`bg-white dark:bg-slate-950 border rounded-2xl p-5 shadow-sm space-y-4 flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-750 transition-all ${
-                cust.outstandingCredit > 0 ? 'border-amber-200/60 dark:border-amber-500/10' : 'border-slate-200 dark:border-slate-850'
+                outstandingCredit > 0 ? 'border-amber-200/60 dark:border-amber-500/10' : 'border-slate-200 dark:border-slate-850'
               }`}
             >
               <div className="space-y-3">
@@ -196,11 +198,11 @@ export default function CreditAccounts() {
                     <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">{cust.segment}</p>
                   </div>
                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide ${
-                    cust.outstandingCredit > 0 
+                    outstandingCredit > 0 
                       ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400' 
                       : 'bg-slate-100 text-slate-500 dark:bg-slate-900 dark:text-slate-400'
                   }`}>
-                    {cust.outstandingCredit > 0 ? 'DEBTOR' : 'NO DEBT'}
+                    {outstandingCredit > 0 ? 'DEBTOR' : 'NO DEBT'}
                   </span>
                 </div>
 
@@ -208,7 +210,7 @@ export default function CreditAccounts() {
                   <div className="flex justify-between text-xs font-semibold">
                     <span className="text-slate-400">Outstanding Debt</span>
                     <span className="text-slate-800 dark:text-slate-100 font-bold">
-                      GHS {cust.outstandingCredit.toFixed(2)}
+                      GHS {outstandingCredit.toFixed(2)}
                     </span>
                   </div>
                   
@@ -223,7 +225,7 @@ export default function CreditAccounts() {
                   </div>
                   
                   <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
-                    <span>Limit: GHS {cust.creditLimit}</span>
+                    <span>Limit: GHS {creditLimit.toFixed(2)}</span>
                     <span>{limitPercentage.toFixed(0)}% utilized</span>
                   </div>
                 </div>
