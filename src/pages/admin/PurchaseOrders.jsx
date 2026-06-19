@@ -280,7 +280,7 @@ export default function PurchaseOrders() {
                       </div>
 
                       <div className="w-24">
-                        <label className="block text-[9px] text-slate-400 dark:text-slate-500 uppercase mb-1">Est. Cost (GHS)</label>
+                        <label className="block text-[9px] text-slate-400 dark:text-slate-500 uppercase mb-1">Unit Cost</label>
                         <input
                           type="number"
                           step="0.01"
@@ -291,17 +291,31 @@ export default function PurchaseOrders() {
                         />
                       </div>
 
+                      <div className="w-24">
+                        <label className="block text-[9px] text-slate-400 dark:text-slate-500 uppercase mb-1 text-right">Line Total</label>
+                        <div className="w-full px-2 py-1.5 bg-transparent border border-transparent rounded-lg text-slate-700 dark:text-slate-300 font-bold text-right truncate">
+                          {formatCurrency(item.quantity * item.unitPrice)}
+                        </div>
+                      </div>
+
                       {poItems.length > 1 && (
                         <button
                           type="button"
                           onClick={() => handleRemoveLineItem(idx)}
-                          className="p-2 bg-red-100 hover:bg-red-200 text-red-655 rounded-lg border border-red-200 font-bold"
+                          className="p-2 bg-red-100 hover:bg-red-200 text-red-655 rounded-lg border border-red-200 font-bold mb-0.5"
                         >
                           ✕
                         </button>
                       )}
                     </div>
                   ))}
+                </div>
+                
+                <div className="flex justify-end items-center border-t border-slate-200 dark:border-slate-800 pt-3 pb-1 mt-2 pr-2">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase mr-3">Total Order Value:</span>
+                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                    {formatCurrency(poItems.reduce((acc, it) => acc + (it.quantity * it.unitPrice), 0))}
+                  </span>
                 </div>
               </div>
 
