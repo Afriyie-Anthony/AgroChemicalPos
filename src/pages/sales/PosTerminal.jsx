@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../../store/useStore';
 import { formatCurrency } from '../../utils/formatters';
 import { useProductList } from '../../hooks/useProduct';
@@ -68,6 +68,16 @@ export default function PosTerminal() {
   const [momoReference, setMomoReference] = useState('');
   const [splitAmounts, setSplitAmounts] = useState({ cash: 0, momo: 0 });
   const [checkoutError, setCheckoutError] = useState('');
+
+  // Automatically trigger browser print dialog when checkout succeeds and modal opens
+  useEffect(() => {
+    if (showReceiptModal && completedTransaction) {
+      const timer = setTimeout(() => {
+        window.print();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [showReceiptModal, completedTransaction]);
 
   const categoriesList = useMemo(() => ['All', ...categoriesData.map(c => c.name)], [categoriesData]);
 
