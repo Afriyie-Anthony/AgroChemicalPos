@@ -192,9 +192,17 @@ export default function Reports() {
     backgroundColor: 'rgba(7, 11, 18, 0.95)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     borderRadius: '16px',
-    color: '#f8fafc',
     fontSize: '11px',
     padding: '8px 12px'
+  };
+
+  const rechartsTooltipLabelStyle = {
+    color: '#ffffff',
+    fontWeight: 'bold'
+  };
+
+  const rechartsTooltipItemStyle = {
+    color: '#f1f5f9'
   };
 
   if (isLoading) {
@@ -277,7 +285,7 @@ export default function Reports() {
               <h3 className="text-xl font-bold mt-1.5 text-emerald-600 dark:text-emerald-400">
                 {formatCurrency(financialData.grossRevenue)}
               </h3>
-              <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-1 font-semibold">From {filteredTransactions.length} sales</p>
+              <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-1 font-semibold">From all recorded sales</p>
             </div>
             
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
@@ -339,7 +347,7 @@ export default function Reports() {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.15} />
                     <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} tickFormatter={(v) => `GHS ${v}`} />
-                    <Tooltip cursor={{ fill: 'rgba(16, 185, 129, 0.05)' }} contentStyle={rechartsTooltipStyle} formatter={(val) => [`GHS ${val.toLocaleString()}`, 'Value']} />
+                    <Tooltip cursor={{ fill: 'rgba(16, 185, 129, 0.05)' }} contentStyle={rechartsTooltipStyle} labelStyle={rechartsTooltipLabelStyle} itemStyle={rechartsTooltipItemStyle} formatter={(val) => [`GHS ${val.toLocaleString()}`, 'Value']} />
                     <Bar dataKey="Value" radius={[6, 6, 0, 0]}>
                       {financialsChartData.map((entry, index) => {
                         const colors = ['#10b981', '#64748b', '#f43f5e', '#3b82f6'];
@@ -396,7 +404,7 @@ export default function Reports() {
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip contentStyle={rechartsTooltipStyle} formatter={(val) => `GHS ${val}`} />
+                        <Tooltip contentStyle={rechartsTooltipStyle} labelStyle={rechartsTooltipLabelStyle} itemStyle={rechartsTooltipItemStyle} formatter={(val) => `GHS ${val}`} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -467,7 +475,7 @@ export default function Reports() {
                     <CartesianGrid strokeDasharray="3 3" opacity={0.15} vertical={false} stroke="#334155" />
                     <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#64748b', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} tickFormatter={(v) => `GHS ${v}`} />
-                    <Tooltip contentStyle={rechartsTooltipStyle} formatter={(val) => `GHS ${val.toLocaleString()}`} />
+                    <Tooltip contentStyle={rechartsTooltipStyle} labelStyle={rechartsTooltipLabelStyle} itemStyle={rechartsTooltipItemStyle} formatter={(val) => `GHS ${val.toLocaleString()}`} />
                     <Legend wrapperStyle={{ fontSize: '10px', fontWeight: 'bold' }} />
                     <Bar dataKey="Cost" fill="#64748b" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="Retail" fill="#10b981" radius={[4, 4, 0, 0]} />
@@ -554,7 +562,7 @@ export default function Reports() {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.15} />
                     <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#64748b', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={rechartsTooltipStyle} formatter={(val) => `GHS ${val.toLocaleString()}`} />
+                    <Tooltip contentStyle={rechartsTooltipStyle} labelStyle={rechartsTooltipLabelStyle} itemStyle={rechartsTooltipItemStyle} formatter={(val) => `GHS ${val.toLocaleString()}`} />
                     <Legend wrapperStyle={{ fontSize: '10px', fontWeight: 'bold' }} />
                     <Bar dataKey="Limit" fill="#64748b" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="Owed" fill="#f43f5e" radius={[4, 4, 0, 0]} />
@@ -597,7 +605,7 @@ export default function Reports() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-5 rounded-2xl shadow-sm">
               <span className="text-[10px] text-slate-455 dark:text-slate-500 font-bold uppercase tracking-wider block">Staff Count</span>
-              <h3 className="text-xl font-bold mt-1.5 text-slate-800 dark:text-slate-100">{staffList.length} Operators</h3>
+              <h3 className="text-xl font-bold mt-1.5 text-slate-800 dark:text-slate-100">{staffPerformance.length} Operators</h3>
               <p className="text-[9px] text-slate-400 mt-1 font-semibold">Active registered personnel</p>
             </div>
             
@@ -631,7 +639,7 @@ export default function Reports() {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.15} />
                     <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#64748b', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={rechartsTooltipStyle} formatter={(val) => `GHS ${val.toLocaleString()}`} />
+                    <Tooltip contentStyle={rechartsTooltipStyle} labelStyle={rechartsTooltipLabelStyle} itemStyle={rechartsTooltipItemStyle} formatter={(val) => `GHS ${val.toLocaleString()}`} />
                     <Legend wrapperStyle={{ fontSize: '10px', fontWeight: 'bold' }} />
                     <Bar dataKey="Revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                   </BarChart>

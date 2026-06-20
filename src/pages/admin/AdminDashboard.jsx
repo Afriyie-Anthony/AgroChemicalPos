@@ -192,9 +192,17 @@ export default function AdminDashboard() {
     backgroundColor: 'rgba(7, 11, 18, 0.95)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     borderRadius: '16px',
-    color: '#f8fafc',
     fontSize: '11px',
     padding: '8px 12px'
+  };
+
+  const rechartsTooltipLabelStyle = {
+    color: '#ffffff',
+    fontWeight: 'bold'
+  };
+
+  const rechartsTooltipItemStyle = {
+    color: '#f1f5f9'
   };
 
   // Find most low-stocked items to show in the widget
@@ -421,7 +429,7 @@ export default function AdminDashboard() {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.15} />
                   <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} tickFormatter={(v) => `GHS ${v}`} />
-                  <Tooltip cursor={{ fill: 'rgba(16, 185, 129, 0.05)' }} contentStyle={rechartsTooltipStyle} formatter={(val) => [`GHS ${val.toLocaleString()}`, 'Value']} />
+                  <Tooltip cursor={{ fill: 'rgba(16, 185, 129, 0.05)' }} contentStyle={rechartsTooltipStyle} labelStyle={rechartsTooltipLabelStyle} itemStyle={rechartsTooltipItemStyle} formatter={(val) => [`GHS ${val.toLocaleString()}`, 'Value']} />
                   <Bar dataKey="Value" radius={[6, 6, 0, 0]}>
                     {financialsChartData.map((entry, index) => {
                       const colors = ['#10b981', '#64748b', '#f43f5e', '#3b82f6'];
@@ -453,7 +461,7 @@ export default function AdminDashboard() {
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip contentStyle={rechartsTooltipStyle} formatter={(val) => `GHS ${val}`} />
+                      <Tooltip contentStyle={rechartsTooltipStyle} labelStyle={rechartsTooltipLabelStyle} itemStyle={rechartsTooltipItemStyle} formatter={(val) => `GHS ${val}`} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
