@@ -1,6 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { reportService } from '../api/services/reportService';
 
+export const useReportsDashboard = (params) => {
+  return useQuery({
+    queryKey: ['reports', 'dashboard', params],
+    queryFn: () => reportService.getReportsDashboard(params).then((r) => r.data),
+  });
+};
+
 export const useDashboardSummary = () => {
   return useQuery({
     queryKey: ['reports', 'summary'],

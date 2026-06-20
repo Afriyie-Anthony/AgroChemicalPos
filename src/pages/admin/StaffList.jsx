@@ -18,7 +18,8 @@ import {
 } from 'lucide-react';
 
 export default function StaffList() {
-  const { data: transactions = [] } = useTransactions({});
+  const { data: responseData } = useTransactions({});
+  const transactions = responseData?.data || [];
   const { data: staffList = [], isLoading } = useStaffList();
   const { mutate: createStaff, isPending: isCreating } = useCreateStaff();
   const { mutate: updateStaffApi, isPending: isUpdating } = useUpdateStaff();

@@ -1,6 +1,7 @@
 import apiClient from '../apiClient';
 
 export const reportService = {
+  getReportsDashboard: (params) => apiClient.get('/reports/dashboard', { params }).then((r) => r.data),
   getSummary: () => apiClient.get('/reports/summary').then((r) => r.data),
   getSales: (params) => apiClient.get('/reports/sales', { params }).then((r) => r.data),
   getInventory: () => apiClient.get('/reports/inventory').then((r) => r.data),

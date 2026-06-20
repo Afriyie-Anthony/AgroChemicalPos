@@ -20,7 +20,8 @@ import {
 export default function CreditAccounts() {
   const { showAlert } = useStore();
   const { data: customers = [], isLoading: loadingCustomers } = useCustomers();
-  const { data: transactions = [], isLoading: loadingTransactions } = useTransactions({});
+  const { data: responseData, isLoading: loadingTransactions } = useTransactions({});
+  const transactions = responseData?.data || [];
   const { mutateAsync: recordRepaymentApi } = useRecordRepayment();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('highest-debt'); // 'highest-debt', 'lowest-debt', 'name'

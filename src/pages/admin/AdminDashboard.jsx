@@ -39,7 +39,8 @@ export default function AdminDashboard() {
   const { data: products = [], isLoading: loadingProducts } = useProductList();
   const { data: customers = [], isLoading: loadingCustomers } = useCustomers();
   const { data: expenses = [], isLoading: loadingExpenses } = useExpenses({});
-  const { data: transactions = [], isLoading: loadingTransactions } = useTransactions({});
+  const { data: responseData, isLoading: loadingTransactions } = useTransactions({});
+  const transactions = responseData?.data || [];
   const [timeFilter, setTimeFilter] = useState('day'); // 'day', 'month', 'year'
   const isAdmin = currentUser?.role === 'admin';
 

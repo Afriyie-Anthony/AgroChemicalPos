@@ -1,12 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
-import { useProductList } from '../../hooks/useProduct';
-import { usePurchaseOrderList } from '../../hooks/usePurchaseOrder';
-import { useCustomers } from '../../hooks/useCustomers';
-import { useExpenses } from '../../hooks/useExpenses';
-import { useTransactions } from '../../hooks/useTransactions';
-import { useStaffList } from '../../hooks/useStaff';
-import { useAdjustmentsReport } from '../../hooks/useReports';
+import { useReportsDashboard } from '../../hooks/useReports';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { 
   TrendingUp, 
@@ -40,349 +34,86 @@ import {
 } from 'recharts';
 
 export default function Reports() {
-  const { data: products = [], isLoading: loadingProducts } = useProductList();
-  const { data: purchaseOrders = [], isLoading: loadingPOs } = usePurchaseOrderList();
-  const { data: customers = [], isLoading: loadingCustomers } = useCustomers();
-  const { data: expenses = [], isLoading: loadingExpenses } = useExpenses({});
-  const { data: transactions = [], isLoading: loadingTransactions } = useTransactions({});
-  const { data: staffList = [], isLoading: loadingStaff } = useStaffList();
-  const { data: adjustments = [], isLoading: loadingAdjustments } = useAdjustmentsReport({});
   const [activeTab, setActiveTab] = useState('financials'); 
+  const [dateFilter, setDateFilter] = useState('all');
 
-  const isLoading = loadingProducts || loadingPOs || loadingCustomers || loadingExpenses || loadingTransactions || loadingStaff || loadingAdjustments;
-  // Tabs: 'financials', 'tax', 'inventory', 'debtors', 'staff', 'movement'
-  const [dateFilter, setDateFilter] = useState('all'); // 'all', 'today', 'week', 'month'
+  const { data: dashboardData, isLoading } = useReportsDashboard({ dateFilter: dateFilter === 'all' ? '' : dateFilter });
 
-  // ==========================================
-  // DATE FILTERING HELPER FOR TRANSACTIONS
-  // ==========================================
-  const filteredTransactions = useMemo(() => {
-    return transactions.filter(t => {
-      if (t.status === 'voided') return false; // exclude voided from financial summaries
-      if (dateFilter === 'all') return true;
-      
-      const date = new Date(t.createdAt);
-      const now = new Date();
-      const diffTime = Math.abs(now - date);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const financialData = dashboardData?.financials || {
+    grossRevenue: 0,
+    totalCogs: 0,
+    grossProfit: 0,
+    profitMargin: 0,
+    paymentBreakdown: { cash: 0, momo: 0, card: 0, credit: 0 },
+    expensesTotal: 0,
+    netProfit: 0,
+    netMargin: 0,
+    expensesPieData: {}
+  };
 
-      if (dateFilter === 'today') {
-        return date.toDateString() === now.toDateString();
-      } else if (dateFilter === 'week') {
-        return diffDays <= 7;
-      } else if (dateFilter === 'month') {
-        return diffDays <= 30;
-      }
-      return true;
-    });
-  }, [transactions, dateFilter]);
+  const inventoryStats = dashboardData?.inventory || {
+    totalQty: 0,
+    assetValueCost: 0,
+    assetValueRetail: 0,
+    unrealizedMargin: 0,
+    lowStockCount: 0,
+    expiringSoon: [],
+    categoryData: {}
+  };
 
-  // ==========================================
-  // DATE FILTERING HELPER FOR EXPENSES
-  // ==========================================
-  const filteredExpenses = useMemo(() => {
-    return expenses.filter(e => {
-      if (dateFilter === 'all') return true;
-      const date = new Date(e.date);
-      const now = new Date();
-      const diffTime = Math.abs(now - date);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const debtorsData = dashboardData?.debtors || {
+    list: [],
+    totalOutstanding: 0,
+    totalLimitPool: 0,
+    count: 0
+  };
 
-      if (dateFilter === 'today') {
-        return date.toDateString() === now.toDateString();
-      } else if (dateFilter === 'week') {
-        return diffDays <= 7;
-      } else if (dateFilter === 'month') {
-        return diffDays <= 30;
-      }
-      return true;
-    });
-  }, [expenses, dateFilter]);
+  const staffPerformance = dashboardData?.staff || [];
+  const stockMovements = dashboardData?.movements || [];
 
-  // ==========================================
-  // 1. FINANCIALS (P&L) CALCULATION
-  // ==========================================
-  const financialData = useMemo(() => {
-    let grossRevenue = 0;
-    let totalCogs = 0;
-    let paymentBreakdown = { cash: 0, momo: 0, card: 0, credit: 0 };
+  const inventoryCategoryData = useMemo(() => {
+    if (!dashboardData?.inventory?.categoryData) return [];
+    return Object.entries(dashboardData.inventory.categoryData).map(([name, val]) => ({
+      name,
+      Cost: val.Cost,
+      Retail: val.Retail
+    }));
+  }, [dashboardData?.inventory?.categoryData]);
 
-    filteredTransactions.forEach(t => {
-      grossRevenue += t.total;
-      
-      if (t.paymentMethod === 'cash') paymentBreakdown.cash += t.total;
-      else if (t.paymentMethod === 'momo') paymentBreakdown.momo += t.total;
-      else if (t.paymentMethod === 'card') paymentBreakdown.card += t.total;
-      else if (t.paymentMethod === 'credit') paymentBreakdown.credit += t.total;
-      
-      t.items.forEach(item => {
-        const prod = products.find(p => p.id === item.productId);
-        const unitCost = prod ? prod.costPrice : 0;
-        totalCogs += (unitCost * item.quantity);
-      });
-    });
+  const expensesTotal = financialData.expensesTotal;
+  const netProfit = financialData.netProfit;
+  const netMargin = financialData.netMargin;
 
-    const grossProfit = grossRevenue - totalCogs;
-    const profitMargin = grossRevenue > 0 ? (grossProfit / grossRevenue) * 100 : 0;
+  const financialsChartData = useMemo(() => [
+    { name: 'Revenue', Value: financialData.grossRevenue },
+    { name: 'COGS', Value: financialData.totalCogs },
+    { name: 'Expenses', Value: expensesTotal },
+    { name: 'Net Profit', Value: netProfit }
+  ], [financialData, expensesTotal, netProfit]);
 
-    return {
-      grossRevenue,
-      totalCogs,
-      grossProfit,
-      profitMargin,
-      paymentBreakdown
-    };
-  }, [filteredTransactions, products]);
-
-  // Expenses summary
-  const expensesTotal = useMemo(() => {
-    return filteredExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
-  }, [filteredExpenses]);
-
-  const netProfit = financialData.grossProfit - expensesTotal;
-  const netMargin = financialData.grossRevenue > 0 ? (netProfit / financialData.grossRevenue) * 100 : 0;
-
-  // Financial Chart Data (Revenue, COGS, Expenses, Net Profit)
-  const financialsChartData = useMemo(() => {
-    return [
-      { name: 'Revenue', Value: financialData.grossRevenue },
-      { name: 'COGS', Value: financialData.totalCogs },
-      { name: 'Expenses', Value: expensesTotal },
-      { name: 'Net Profit', Value: netProfit }
-    ];
-  }, [financialData, expensesTotal, netProfit]);
-
-  // Expenses Pie Chart data
   const expensesPieData = useMemo(() => {
-    const cats = {};
-    filteredExpenses.forEach(e => {
-      cats[e.category] = (cats[e.category] || 0) + Number(e.amount);
-    });
     const colors = ['#10b981', '#3b82f6', '#f43f5e', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6'];
-    return Object.entries(cats).map(([name, value], i) => ({
+    return Object.entries(financialData.expensesPieData || {}).map(([name, value], i) => ({
       name,
       value,
       color: colors[i % colors.length]
     }));
-  }, [filteredExpenses]);
+  }, [financialData.expensesPieData]);
 
-
-  // ==========================================
-  // 3. INVENTORY & ASSETS CALCULATION
-  // ==========================================
-  const inventoryStats = useMemo(() => {
-    let totalQty = 0;
-    let assetValueCost = 0;
-    let assetValueRetail = 0;
-    let lowStockCount = 0;
-
-    products.forEach(p => {
-      const prodQty = p.batches.reduce((sum, b) => sum + Number(b.quantity), 0);
-      totalQty += prodQty;
-
-      if (prodQty <= p.reorderLevel) {
-        lowStockCount++;
-      }
-
-      p.batches.forEach(b => {
-        assetValueCost += (b.quantity * (b.purchasePrice || p.costPrice));
-        assetValueRetail += (b.quantity * p.retailPrice);
-      });
-    });
-
-    const unrealizedMargin = assetValueRetail - assetValueCost;
-
-    // FEFO Near Expiry Checklist
-    const expiringSoon = [];
-    const now = new Date();
-    products.forEach(p => {
-      p.batches.forEach(b => {
-        const exp = new Date(b.expiryDate);
-        const diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
-        if (diffDays <= 180 && diffDays > 0) {
-          expiringSoon.push({
-            id: b.id,
-            productName: p.name,
-            batchNumber: b.batchNumber,
-            quantity: b.quantity,
-            expiryDate: b.expiryDate,
-            daysLeft: diffDays
-          });
-        }
-      });
-    });
-
-    expiringSoon.sort((a, b) => a.daysLeft - b.daysLeft);
-
-    // Filter low stock
-    const lowStockItems = products
-      .map(p => {
-        const qty = p.batches.reduce((sum, b) => sum + Number(b.quantity), 0);
-        return { ...p, currentQty: qty };
-      })
-      .filter(p => p.currentQty <= p.reorderLevel);
-
-    return {
-      totalQty,
-      assetValueCost,
-      assetValueRetail,
-      unrealizedMargin,
-      lowStockCount,
-      expiringSoon,
-      lowStockItems
-    };
-  }, [products]);
-
-  // Category wise Cost vs Retail asset value
-  const inventoryCategoryData = useMemo(() => {
-    const cats = {};
-    products.forEach(p => {
-      const prodCost = p.batches.reduce((sum, b) => sum + (b.quantity * (b.purchasePrice || p.costPrice)), 0);
-      const prodRetail = p.batches.reduce((sum, b) => sum + (b.quantity * p.retailPrice), 0);
-      
-      cats[p.category] = cats[p.category] || { cost: 0, retail: 0 };
-      cats[p.category].cost += prodCost;
-      cats[p.category].retail += prodRetail;
-    });
-
-    return Object.entries(cats).map(([name, val]) => ({
-      name,
-      Cost: val.cost,
-      Retail: val.retail
-    }));
-  }, [products]);
-
-  // ==========================================
-  // 4. DEBTORS & CREDITS SUMMARY
-  // ==========================================
-  const debtorsData = useMemo(() => {
-    const activeDebtors = customers.filter(c => c.outstandingCredit > 0);
-    const totalOutstanding = activeDebtors.reduce((sum, c) => sum + Number(c.outstandingCredit), 0);
-    const totalLimitPool = customers.reduce((sum, c) => sum + Number(c.creditLimit), 0);
-    const bufferAvailable = totalLimitPool - totalOutstanding;
-
-    return {
-      list: activeDebtors,
-      totalOutstanding,
-      totalLimitPool,
-      bufferAvailable,
-      count: activeDebtors.length
-    };
-  }, [customers]);
-
-  // Top Debtors outstanding vs limit data
   const debtorsChartData = useMemo(() => {
-    return debtorsData.list
-      .slice(0, 5)
-      .map(c => ({
-        name: c.name,
-        Owed: c.outstandingCredit,
-        Limit: c.creditLimit
-      }));
+    return debtorsData.list.slice(0, 5).map(c => ({
+      name: c.name,
+      Owed: c.outstandingCredit,
+      Limit: c.creditLimit
+    }));
   }, [debtorsData]);
 
-  // ==========================================
-  // 5. STAFF PERFORMANCE CALCULATION
-  // ==========================================
-  const staffPerformance = useMemo(() => {
-    return staffList.map(staff => {
-      const staffTrx = filteredTransactions.filter(t => t.cashierId === staff.id);
-      const salesCount = staffTrx.length;
-      const totalRevenue = staffTrx.reduce((sum, t) => sum + Number(t.total), 0);
-
-      return {
-        id: staff.id,
-        name: staff.name,
-        role: staff.role,
-        phone: staff.phone,
-        salesCount,
-        totalRevenue
-      };
-    });
-  }, [staffList, filteredTransactions]);
-
-  // Staff billing bar chart data
   const staffChartData = useMemo(() => {
     return staffPerformance.map(s => ({
       name: s.name,
       Revenue: s.totalRevenue
     }));
   }, [staffPerformance]);
-
-  // ==========================================
-  // 6. STOCK MOVEMENT LEDGER (AUDIT LEDGER)
-  // ==========================================
-  const stockMovements = useMemo(() => {
-    const movements = [];
-
-    // 1. Sales Logs (Decrease stock / Restock if voided)
-    transactions.forEach(t => {
-      const statusLabel = t.status === 'voided' ? 'Voided Sale' : 'Sale Checkout';
-      t.items.forEach(item => {
-        movements.push({
-          id: `m-sale-${t.id}-${item.productId}-${item.batchId}`,
-          date: t.createdAt,
-          type: t.status === 'voided' ? 'in' : 'out',
-          typeLabel: statusLabel,
-          productName: item.name,
-          quantity: item.quantity,
-          unit: item.unit,
-          batchNumber: item.batchNumber,
-          reference: t.transactionCode,
-          user: t.cashierName
-        });
-      });
-    });
-
-    // 2. Received Purchase Orders Logs (Increase stock)
-    purchaseOrders.forEach(po => {
-      if (po.status === 'received') {
-        po.items.forEach(item => {
-          movements.push({
-            id: `m-po-${po.id}-${item.productId}`,
-            date: po.receivedAt || po.createdAt,
-            type: 'in',
-            typeLabel: 'Procurement (GRN)',
-            productName: item.name,
-            quantity: item.quantity,
-            unit: 'Units',
-            batchNumber: 'New Batch / Restock',
-            reference: po.poCode,
-            user: 'System Admin'
-          });
-        });
-      }
-    });
-
-    // 3. Manual Stock Adjustments Logs
-    (adjustments || []).forEach(adj => {
-      if (adj.reason === 'sale' || adj.reason === 'void') return;
-
-      const qty = Math.abs(adj.quantityChange || 0);
-      const direction = adj.quantityChange < 0 ? 'out' : 'in';
-      const reasonLabels = {
-        damage: 'Spillage / Damage',
-        theft: 'Theft / Write-off',
-        'count correction': 'Count Correction',
-        'promotional give-away': 'Promo Giveaway'
-      };
-
-      movements.push({
-        id: adj.id,
-        date: adj.createdAt || adj.date,
-        type: direction,
-        typeLabel: `Adjustment (${reasonLabels[adj.reason] || adj.reason})`,
-        productName: adj.productName || 'Unknown Product',
-        quantity: qty,
-        unit: 'Units',
-        batchNumber: adj.batchNumber || 'N/A',
-        reference: 'INV-ADJ',
-        user: adj.staff?.name || adj.user || 'Unknown'
-      });
-    });
-
-    return movements.sort((a, b) => new Date(b.date) - new Date(a.date));
-  }, [transactions, purchaseOrders, adjustments]);
 
   // ==========================================
   // DYNAMIC CSV EXPORT GENERATOR
@@ -408,25 +139,21 @@ export default function Reports() {
         ['Outstanding Customer Credit', financialData.paymentBreakdown.credit.toFixed(2)]
       ];
     } else if (activeTab === 'inventory') {
-      headers = ['Product Name', 'Remaining Stock', 'Reorder Level', 'Status'];
-      rows = products.map(p => {
-        const qty = p.batches.reduce((sum, b) => sum + Number(b.quantity), 0);
-        return [
-          p.name,
-          qty,
-          p.reorderLevel,
-          qty <= p.reorderLevel ? 'Low Stock' : 'Good Stock'
-        ];
-      });
+      headers = ['Category Name', 'Total Cost Value', 'Total Retail Value'];
+      rows = inventoryCategoryData.map(c => [
+        c.name,
+        c.Cost.toFixed(2),
+        c.Retail.toFixed(2)
+      ]);
     } else if (activeTab === 'debtors') {
       headers = ['Customer Name', 'Phone Hotline', 'Customer Segment', 'Credit Limit (GHS)', 'Outstanding Credit (GHS)', 'Available Buffer (GHS)'];
-      rows = customers.map(c => [
+      rows = debtorsData.list.map(c => [
         c.name,
-        c.phone,
-        c.segment,
-        c.creditLimit.toFixed(2),
-        c.outstandingCredit.toFixed(2),
-        (c.creditLimit - c.outstandingCredit).toFixed(2)
+        c.phone || 'N/A',
+        c.segment || 'Regular',
+        (Number(c.creditLimit) || 0).toFixed(2),
+        (Number(c.outstandingCredit) || 0).toFixed(2),
+        ((Number(c.creditLimit) || 0) - (Number(c.outstandingCredit) || 0)).toFixed(2)
       ]);
     } else if (activeTab === 'staff') {
       headers = ['Staff Personnel', 'Role Profile', 'Sales Made', 'Revenue Generated (GHS)'];
