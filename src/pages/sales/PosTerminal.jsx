@@ -140,7 +140,8 @@ export default function PosTerminal() {
   };
 
   // Submit Sale Checkout
-  const handleProcessCheckout = async () => {
+  const handleProcessCheckout = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
     setCheckoutError('');
     if (cart.length === 0) return;
 
@@ -578,8 +579,11 @@ export default function PosTerminal() {
           <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-2xl animate-in fade-in duration-150">
             <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200 dark:border-slate-800">
               <div>
-                <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Finalize Sales Payment</h2>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Amount due: {formatCurrency(cartSummary.total)}</p>
+                <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Finalize Sales Payment</h2>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-sm text-slate-500 dark:text-slate-400">Amount due:</span>
+                  <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(cartSummary.total)}</span>
+                </div>
               </div>
               <button onClick={() => setShowCheckoutModal(false)} className="text-slate-400 hover:text-slate-655 dark:text-slate-500 dark:hover:text-slate-200">
                 <X className="w-5 h-5" />
@@ -749,7 +753,7 @@ export default function PosTerminal() {
 
       {/* Modal: Thermal Receipt Print Layout */}
       {showReceiptModal && completedTransaction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-955/80 dark:bg-slate-955/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 dark:bg-slate-950/80 backdrop-blur-sm">
           <div id="receipt-print-area" className="w-full max-w-sm bg-white text-slate-950 border border-slate-300 rounded-3xl overflow-hidden shadow-2xl p-6 font-mono text-[11px] animate-in fade-in zoom-in-95 duration-150">
             {/* Thermal Slip header */}
             <div className="text-center space-y-1">
@@ -774,10 +778,10 @@ export default function PosTerminal() {
                 <span>Cashier:</span>
                 <span>{completedTransaction.cashierName}</span>
               </div>
-              {completedTransaction.customer && (
+              {(completedTransaction.customerName || (completedTransaction.customer && completedTransaction.customer.name)) && (
                 <div className="flex justify-between">
                   <span>Customer:</span>
-                  <span>{completedTransaction.customer.name}</span>
+                  <span>{completedTransaction.customerName || completedTransaction.customer.name}</span>
                 </div>
               )}
               <div className="flex justify-between border-b border-dashed border-slate-400 pb-2">
@@ -807,10 +811,26 @@ export default function PosTerminal() {
 
             {/* Totals */}
             <div className="py-2.5 space-y-1 border-b border-dashed border-slate-400 text-slate-900 font-medium">
-              <div className="flex justify-between text-xs font-bold pt-1">
+              <div className="flex justify-between">
+                <span>Subtotal:</span>
+                <span>{formatCurrency(completedTransaction.total)}</span>
+              </div>
+              <div className="flex justify-between text-xs font-bold pt-1 border-t border-dotted border-slate-300">
                 <span>Total Paid:</span>
                 <span>{formatCurrency(completedTransaction.total)}</span>
               </div>
+              {completedTransaction.paymentMethod === 'cash' && (
+                <>
+                  <div className="flex justify-between pt-1">
+                    <span>Cash Tendered:</span>
+                    <span>{formatCurrency(completedTransaction.amountPaid)}</span>
+                  </div>
+                  <div className="flex justify-between text-emerald-600 font-bold">
+                    <span>Change Returned:</span>
+                    <span>{formatCurrency(completedTransaction.amountPaid - completedTransaction.total)}</span>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Footer advice */}
