@@ -6,7 +6,7 @@ const TRANSACTIONS_KEY = ['transactions'];
 export const useTransactions = (params) => {
   return useQuery({
     queryKey: [...TRANSACTIONS_KEY, params],
-    queryFn: () => transactionService.getAll(params).then((r) => r.data),
+    queryFn: () => transactionService.getAll(params).then((r) => ({ data: r.data, metrics: r.metrics })),
   });
 };
 

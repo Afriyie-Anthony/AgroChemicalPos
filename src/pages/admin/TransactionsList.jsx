@@ -1,13 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { formatCurrency, formatDateTime } from '../../utils/formatters';
-import { Receipt, Search, Eye, AlertCircle, X, ShieldAlert, Check, Printer } from 'lucide-react';
+import { Receipt, Search, Eye, AlertCircle, X, ShieldAlert, Check, Printer, DollarSign, ShoppingBag, TrendingUp, Activity } from 'lucide-react';
 
 import { useTransactions, useVoidTransaction } from '../../hooks/useTransactions';
 
 export default function TransactionsList() {
   const { showAlert } = useStore();
-  const { data: transactions = [], isLoading } = useTransactions({});
+  const { data: responseData, isLoading } = useTransactions({});
+  const transactions = responseData?.data || [];
+  const metrics = responseData?.metrics || { numSales: 0, totalSellingPrice: 0, totalCostPrice: 0, profit: 0 };
+  
   const { mutateAsync: voidTransactionApi } = useVoidTransaction();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMethod, setSelectedMethod] = useState('All');
@@ -53,6 +56,51 @@ export default function TransactionsList() {
       <div>
         <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Sales & Transaction History</h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Audit checkout registers, view receipts, and void erroneous transactions</p>
+      </div>
+
+      {/* Metrics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Number of Sales</p>
+            <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{metrics.numSales}</h3>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+            <ShoppingBag className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Total Cost Price</p>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{formatCurrency(metrics.totalCostPrice)}</h3>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400">
+            <Activity className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Total Selling Price</p>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{formatCurrency(metrics.totalSellingPrice)}</h3>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+            <DollarSign className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Total Profit</p>
+            <h3 className={`text-xl font-bold ${metrics.profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
+              {formatCurrency(metrics.profit)}
+            </h3>
+          </div>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${metrics.profit >= 0 ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' : 'bg-red-50 dark:bg-red-900/20 text-red-500'}`}>
+            <TrendingUp className="w-5 h-5" />
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
