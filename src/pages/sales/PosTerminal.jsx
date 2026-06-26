@@ -3,7 +3,7 @@ import { useStore } from '../../store/useStore';
 import { formatCurrency } from '../../utils/formatters';
 import { useProductList } from '../../hooks/useProduct';
 import { useCategoryList } from '../../hooks/useCategory';
-import { useCustomers } from '../../hooks/useCustomers';
+import { useCustomers, useCreateCustomer } from '../../hooks/useCustomers';
 import { useCheckout } from '../../hooks/useTransactions';
 import {
   Search,
@@ -35,11 +35,11 @@ export default function PosTerminal() {
     setWholesaleMode,
     holdCart,
     resumeCart,
-    addCustomer,
     showAlert
   } = useStore();
 
   const { mutateAsync: checkoutApi, isPending: isCheckingOut } = useCheckout();
+  const { mutateAsync: addCustomerApi, isPending: isAddingCustomer } = useCreateCustomer();
 
   const { data: customers = [] } = useCustomers();
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,6 +57,9 @@ export default function PosTerminal() {
   // New Customer Form State
   const [newCustName, setNewCustName] = useState('');
   const [newCustPhone, setNewCustPhone] = useState('');
+  const [newCustEmail, setNewCustEmail] = useState('');
+  const [newCustLocation, setNewCustLocation] = useState('');
+  const [newCustGps, setNewCustGps] = useState('');
   const [newCustLimit, setNewCustLimit] = useState(500);
   const [newCustSegment, setNewCustSegment] = useState('Smallholder Farmer');
 
@@ -120,23 +123,33 @@ export default function PosTerminal() {
   };
 
   // Create & attach new customer
-  const handleCreateCustomer = (e) => {
+  const handleCreateCustomer = async (e) => {
     e.preventDefault();
     if (!newCustName || !newCustPhone) return;
 
-    const added = addCustomer({
-      name: newCustName,
-      phone: newCustPhone,
-      segment: newCustSegment,
-      creditLimit: parseFloat(newCustLimit) || 500,
-      location: 'Local Region',
-      gpsAddress: 'N/A'
-    });
+    try {
+      const response = await addCustomerApi({
+        name: newCustName,
+        phone: newCustPhone,
+        email: newCustEmail,
+        segment: newCustSegment,
+        creditLimit: parseFloat(newCustLimit) || 500,
+        location: newCustLocation || 'Local Region',
+        gpsAddress: newCustGps || 'N/A'
+      });
 
-    setSelectedCustomer(added);
-    setShowCustomerModal(false);
-    setNewCustName('');
-    setNewCustPhone('');
+      setSelectedCustomer(response.data);
+      setShowCustomerModal(false);
+      setNewCustName('');
+      setNewCustPhone('');
+      setNewCustEmail('');
+      setNewCustLocation('');
+      setNewCustGps('');
+      setNewCustLimit(500);
+      setNewCustSegment('Smallholder Farmer');
+    } catch (error) {
+      showAlert('Failed to add customer', 'error');
+    }
   };
 
   // Submit Sale Checkout
@@ -364,7 +377,7 @@ export default function PosTerminal() {
               <div className="w-full flex items-center justify-between space-x-2">
                 <select
                   onChange={(e) => {
-                    const found = customers.find(c => c.id === e.target.value);
+                    const found = customers.find(c => String(c.id) === String(e.target.value));
                     if (found) setSelectedCustomer(found);
                   }}
                   className="flex-1 px-2.5 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-[10px] text-slate-700 dark:text-slate-300 focus:outline-none"
@@ -505,67 +518,109 @@ export default function PosTerminal() {
               </button>
             </div>
             <form onSubmit={handleCreateCustomer} className="p-6 space-y-4 text-slate-800 dark:text-slate-200">
-              <div>
-                <label className="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Full Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Samuel Osei"
-                  value={newCustName}
-                  onChange={(e) => setNewCustName(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
-                />
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Full Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Ama Serwaa"
+                    value={newCustName}
+                    onChange={(e) => setNewCustName(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Phone Number *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. 0244123456"
+                    value={newCustPhone}
+                    onChange={(e) => setNewCustPhone(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    placeholder="e.g. ama@gmail.com"
+                    value={newCustEmail}
+                    onChange={(e) => setNewCustEmail(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Location / Town</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Nsawam"
+                      value={newCustLocation}
+                      onChange={(e) => setNewCustLocation(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Ghana Post GPS Code</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. EN-023-4567"
+                      value={newCustGps}
+                      onChange={(e) => setNewCustGps(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Farmer Segment</label>
+                    <select
+                      value={newCustSegment}
+                      onChange={(e) => setNewCustSegment(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+                    >
+                      <option value="Smallholder Farmer">Smallholder</option>
+                      <option value="Commercial Farmer">Commercial</option>
+                      <option value="Agro-Dealer">Agro-Dealer</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Credit Limit (GHS)</label>
+                    <input
+                      type="number"
+                      placeholder="500"
+                      value={newCustLimit}
+                      onChange={(e) => setNewCustLimit(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Phone Number *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. 0244123456"
-                  value={newCustPhone}
-                  onChange={(e) => setNewCustPhone(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Customer Segment</label>
-                <select
-                  value={newCustSegment}
-                  onChange={(e) => setNewCustSegment(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
-                >
-                  <option value="Smallholder Farmer">Smallholder Farmer</option>
-                  <option value="Commercial Farmer">Commercial Farmer</option>
-                  <option value="Agro-Dealer">Agro-Dealer Wholesale</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Credit Limit (GHS)</label>
-                <input
-                  type="number"
-                  placeholder="500"
-                  value={newCustLimit}
-                  onChange={(e) => setNewCustLimit(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-2">
+              <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowCustomerModal(false)}
-                  className="px-4 py-2 bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold"
+                  className="px-4 py-2 bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-900 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold rounded-xl text-xs"
+                  disabled={isAddingCustomer}
+                  className={`px-4 py-2 text-slate-950 font-bold rounded-xl text-xs transition-colors flex items-center justify-center min-w-[110px] ${
+                    isAddingCustomer ? 'bg-emerald-400/70 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400'
+                  }`}
                 >
-                  Attach & Save
+                  {isAddingCustomer && (
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-slate-950" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  )}
+                  <span>{isAddingCustomer ? 'Saving...' : 'Attach & Save'}</span>
                 </button>
               </div>
             </form>
@@ -800,7 +855,7 @@ export default function PosTerminal() {
               {completedTransaction.items.map((it, idx) => (
                 <div key={idx} className="flex">
                   <div className="flex-1">
-                    <span>{it.name}</span>
+                    <span>{it.productName || it.name}</span>
                     <span className="block text-[9px] text-slate-500">Batch: {it.batchNumber}</span>
                   </div>
                   <span className="w-10 text-center">{it.quantity}</span>

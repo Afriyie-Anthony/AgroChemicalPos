@@ -47,14 +47,14 @@ export default function StaffList() {
     // Populate from completed transactions
     transactions.forEach(t => {
       if (t.status !== 'voided' && analytics[t.cashierId]) {
-        analytics[t.cashierId].totalSales += t.total;
+        analytics[t.cashierId].totalSales += Number(t.total) || 0;
       }
     });
 
     // Sum overall sales
     staffList.forEach(s => {
       const stats = analytics[s.id] || { totalSales: 0 };
-      totalSalesSum += stats.totalSales;
+      totalSalesSum += Number(stats.totalSales) || 0;
       analytics[s.id] = stats;
     });
 
