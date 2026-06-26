@@ -25,7 +25,7 @@ export default function TransactionsList() {
       const matchesSearch = 
         t.transactionCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
         t.cashierName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (t.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase());
+        (t.customerName || '').toLowerCase().includes(searchQuery.toLowerCase());
       
       const matchesMethod = selectedMethod === 'All' || t.paymentMethod === selectedMethod;
 
@@ -176,7 +176,7 @@ export default function TransactionsList() {
                     <tr key={t.id} className={`hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors text-xs ${isVoided ? 'opacity-50 line-through' : ''}`}>
                       <td className="px-6 py-4 font-mono font-bold text-slate-850 dark:text-slate-200">{t.transactionCode}</td>
                       <td className="px-6 py-4 text-slate-500 dark:text-slate-400">{formatDateTime(t.createdAt)}</td>
-                      <td className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300">{t.customer?.name || 'Walk-in Customer'}</td>
+                      <td className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300">{t.customerName || 'Walk-in Customer'}</td>
                       <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{t.cashierName}</td>
                       <td className="px-6 py-4">
                         <span className="font-bold text-slate-800 dark:text-slate-100">
@@ -228,6 +228,7 @@ export default function TransactionsList() {
               </button>
               <span className="text-lg">🌿</span>
               <h2 className="text-sm font-bold uppercase">AgroChem POS Store</h2>
+              <p>Nsawam Main Road, Eastern Region</p>
               <p>GPS: EN-023-4567 | Phone: 0244123456</p>
               <p className="border-b border-dashed border-slate-400 pb-2">GRA TIN: GHA-98765432-1</p>
             </div>
@@ -241,9 +242,9 @@ export default function TransactionsList() {
             )}
 
             {/* Meta */}
-            <div className="py-2.5 space-y-1 border-b border-dashed border-slate-400">
+            <div className="py-2.5 space-y-1 border-b border-dashed border-slate-400 text-slate-900">
               <div className="flex justify-between">
-                <span>Trx:</span>
+                <span>Trx Code:</span>
                 <span className="font-bold">{activeTrx.transactionCode}</span>
               </div>
               <div className="flex justify-between">
@@ -254,30 +255,70 @@ export default function TransactionsList() {
                 <span>Cashier:</span>
                 <span>{activeTrx.cashierName}</span>
               </div>
-              {activeTrx.customer && (
+              {activeTrx.customerName && (
                 <div className="flex justify-between">
                   <span>Customer:</span>
-                  <span>{activeTrx.customer.name}</span>
+                  <span>{activeTrx.customerName}</span>
                 </div>
               )}
+              <div className="flex justify-between border-b border-dashed border-slate-400 pb-2">
+                <span>Pay Mode:</span>
+                <span className="font-bold uppercase">{activeTrx.paymentMethod}</span>
+              </div>
             </div>
 
-            {/* Items */}
-            <div className="py-2.5 space-y-1 border-b border-dashed border-slate-400">
+            {/* Items table */}
+            <div className="space-y-1.5 border-b border-dashed border-slate-400 pb-2 text-slate-900">
+              <div className="flex font-bold">
+                <span className="flex-1">Item Description</span>
+                <span className="w-10 text-center">Qty</span>
+                <span className="w-20 text-right">Price</span>
+              </div>
               {activeTrx.items.map((it, idx) => (
-                <div key={idx} className="flex justify-between">
-                  <span>{it.name} (x{it.quantity})</span>
-                  <span>{formatCurrency((it.price - it.discount) * it.quantity)}</span>
+                <div key={idx} className="flex">
+                  <div className="flex-1">
+                    <span>{it.productName || it.name}</span>
+                  </div>
+                  <span className="w-10 text-center">{Number(it.quantity).toFixed(2)}</span>
+                  <span className="w-20 text-right">{formatCurrency((it.price - it.discount) * it.quantity)}</span>
                 </div>
               ))}
             </div>
 
             {/* Totals */}
-            <div className="py-2.5 space-y-1 border-b border-dashed border-slate-400">
-              <div className="flex justify-between text-xs font-bold pt-1">
-                <span>Grand Total:</span>
+            <div className="py-2.5 space-y-1 border-b border-dashed border-slate-400 text-slate-900 font-medium">
+              <div className="flex justify-between">
+                <span>Subtotal:</span>
+                <span>{formatCurrency(activeTrx.subtotal || activeTrx.total)}</span>
+              </div>
+              <div className="flex justify-between text-xs font-bold pt-1 border-t border-dotted border-slate-300">
+                <span>Total Paid:</span>
                 <span>{formatCurrency(activeTrx.total)}</span>
               </div>
+              {activeTrx.paymentMethod === 'cash' && activeTrx.amountPaid && (
+                <>
+                  <div className="flex justify-between pt-1">
+                    <span>Cash Tendered:</span>
+                    <span>{formatCurrency(activeTrx.amountPaid)}</span>
+                  </div>
+                  <div className="flex justify-between text-emerald-600 font-bold">
+                    <span>Change Returned:</span>
+                    <span>{formatCurrency(activeTrx.amountPaid - activeTrx.total)}</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Footer advice */}
+            <div className="text-center pt-3 space-y-1.5">
+              <p className="font-bold uppercase text-red-600 flex items-center justify-center space-x-1.5">
+                <AlertCircle className="w-3.5 h-3.5" />
+                <span>Safety Warning</span>
+              </p>
+              <p className="text-[9px] text-slate-600 font-sans leading-relaxed">
+                Ensure all chemicals are locked away from kids. Always wash hands after usage. Report any adverse reactions to MoFA/EPA.
+              </p>
+              <p className="border-t border-slate-300 pt-2 text-[10px] text-slate-500 font-bold">Thank you for your business!</p>
             </div>
 
             {/* Actions */}
