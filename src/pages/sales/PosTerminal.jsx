@@ -43,6 +43,7 @@ export default function PosTerminal() {
 
   const { data: customers = [] } = useCustomers();
   const [searchQuery, setSearchQuery] = useState('');
+  const [customerSearch, setCustomerSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   
   const { data: products = [], isLoading: isProductsLoading } = useProductList();
@@ -375,19 +376,25 @@ export default function PosTerminal() {
               </div>
             ) : (
               <div className="w-full flex items-center justify-between space-x-2">
-                <select
+                <input
+                  list="customer-datalist"
+                  placeholder="Attach Customer..."
+                  value={customerSearch}
                   onChange={(e) => {
-                    const found = customers.find(c => String(c.id) === String(e.target.value));
-                    if (found) setSelectedCustomer(found);
+                    setCustomerSearch(e.target.value);
+                    const found = customers.find(c => `${c.name} (${c.phone})` === e.target.value);
+                    if (found) {
+                      setSelectedCustomer(found);
+                      setCustomerSearch('');
+                    }
                   }}
                   className="flex-1 px-2.5 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-[10px] text-slate-700 dark:text-slate-300 focus:outline-none"
-                  value=""
-                >
-                  <option value="" disabled>Attach Customer...</option>
+                />
+                <datalist id="customer-datalist">
                   {customers.map(c => (
-                    <option key={c.id} value={c.id}>{c.name} ({c.phone})</option>
+                    <option key={c.id} value={`${c.name} (${c.phone})`} />
                   ))}
-                </select>
+                </datalist>
                 <button
                   onClick={() => setShowCustomerModal(true)}
                   className="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-800 text-[10px] font-bold text-slate-700 dark:text-slate-300 rounded-lg border border-slate-300 dark:border-slate-700"
@@ -856,7 +863,6 @@ export default function PosTerminal() {
                 <div key={idx} className="flex">
                   <div className="flex-1">
                     <span>{it.productName || it.name}</span>
-                    <span className="block text-[9px] text-slate-500">Batch: {it.batchNumber}</span>
                   </div>
                   <span className="w-10 text-center">{it.quantity}</span>
                   <span className="w-20 text-right">{formatCurrency((it.price - it.discount) * it.quantity)}</span>
